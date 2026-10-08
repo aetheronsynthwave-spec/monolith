@@ -1,4 +1,4 @@
-plugins { id 'fabric-loom' version '1.14-SNAPSHOT'; id 'maven-publish' }
+plugins { id 'fabric-loom' version '1.7-SNAPSHOT'; id 'maven-publish' }
 version = project.mod_version
 group = 'dev.monolith'
 base { archivesName = 'monolith' }
