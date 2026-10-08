@@ -3,7 +3,6 @@ package dev.monolith.module;
 import dev.monolith.setting.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.util.math.MatrixStack;
 import java.util.*;
 
 /** Base class for all features. Add settings in the constructor via {@link #add}; the GUI picks them up automatically. */
@@ -36,6 +35,4 @@ public abstract class Module {
     public void onTick() {}
     /** 2D overlay; only called while enabled and in a world. */
     public void onHud(DrawContext ctx, float delta) {}
-    /** 3D pass; only called while enabled. */
-    public void onWorld(MatrixStack matrices, float delta) {}
 }

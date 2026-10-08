@@ -15,7 +15,6 @@ public class HudEditorScreen extends Screen {
     private final Screen parent; private HudModule drag; private double ox, oy;
     public HudEditorScreen(Screen parent) { super(Text.literal("HUD Editor")); this.parent = parent; }
     @Override public boolean shouldPause() { return false; }
-    @Override protected void applyBlur() {}
     @Override public void renderBackground(DrawContext c, int mx, int my, float d) {}
 
     @Override public void render(DrawContext c, int mx, int my, float d) {

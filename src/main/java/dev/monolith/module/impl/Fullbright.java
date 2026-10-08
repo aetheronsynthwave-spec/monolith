@@ -1,4 +1,5 @@
 package dev.monolith.module.impl;
+import dev.monolith.module.Module;
 import dev.monolith.module.*;
 import net.minecraft.entity.effect.*;
 /** Client-side night vision. (A gamma mixin would avoid the effect icon; this needs no mixin.) */

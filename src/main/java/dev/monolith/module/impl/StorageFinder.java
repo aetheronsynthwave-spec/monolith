@@ -28,7 +28,7 @@ public class StorageFinder extends ESPModule {
     }
 
     @Override protected int colorFor(BlockEntity be) {
-        // Order matters: Trapped/Dropper are subclasses of Chest/Dispenser.
+        // Order matters: Trapped is a subclass of Chest, Dropper a subclass of Dispenser.
         if (be instanceof TrappedChestBlockEntity) return trapped.get() ? cTrapped.get() : 0;
         if (be instanceof ChestBlockEntity) return chests.get() ? cChest.get() : 0;
         if (be instanceof BarrelBlockEntity) return barrels.get() ? cBarrel.get() : 0;
@@ -38,7 +38,4 @@ public class StorageFinder extends ESPModule {
         if (be instanceof HopperBlockEntity) return hoppers.get() ? cHopper.get() : 0;
         return 0;
     }
-
-    /** Color 0 = type disabled: skip. */
-    @Override public void onWorld(net.minecraft.client.util.math.MatrixStack m, float d) { super.onWorld(m, d); }
 }

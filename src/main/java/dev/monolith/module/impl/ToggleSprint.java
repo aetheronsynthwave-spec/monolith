@@ -1,4 +1,5 @@
 package dev.monolith.module.impl;
+import dev.monolith.module.Module;
 import dev.monolith.module.*;
 public class ToggleSprint extends Module {
     public ToggleSprint() { super("ToggleSprint", "Hold sprint automatically while moving forward.", Category.MOVEMENT); }

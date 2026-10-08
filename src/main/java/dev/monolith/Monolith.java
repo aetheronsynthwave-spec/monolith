@@ -1,16 +1,16 @@
 package dev.monolith;
+import dev.monolith.module.Module;
 
 import dev.monolith.config.ConfigManager;
 import dev.monolith.gui.ClickGuiScreen;
 import dev.monolith.hud.HudModule;
 import dev.monolith.module.*;
 import dev.monolith.module.impl.*;
-import dev.monolith.render.Render3D;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.*;
-import net.fabricmc.fabric.api.client.rendering.v1.*;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.util.math.MatrixStack;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.*;
 
@@ -51,12 +51,6 @@ public class Monolith implements ClientModInitializer {
             for (ESPModule f : finders()) f.untrack(be); });
         ClientPlayConnectionEvents.DISCONNECT.register((h, mc) -> { for (ESPModule f : finders()) f.clear(); });
 
-        // 3D pass. VERIFY: event name/context in Fabric API for 1.21.11 (render-v1 was reworked after 1.21.8).
-        WorldRenderEvents.AFTER_TRANSLUCENT.register(ctx -> {
-            Render3D.consumers = ctx.consumers();
-            MatrixStack ms = ctx.matrices();
-            for (Module m : modules.all()) if (m.isEnabled()) m.onWorld(ms, 0f);
-        });
         LOGGER.info("Monolith ready: {} modules", modules.all().size());
     }
 

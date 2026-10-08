@@ -1,4 +1,5 @@
 package dev.monolith.gui;
+import dev.monolith.module.Module;
 
 import dev.monolith.Monolith;
 import dev.monolith.hud.HudModule;
@@ -37,7 +38,6 @@ public class ClickGuiScreen extends Screen {
 
     public ClickGuiScreen() { super(Text.literal("Monolith")); for (Category c : Category.values()) tabs.add(c.label); tabs.add(HUDEDIT); tabs.add(PROFILES); tab = tabs.get(2); }
     @Override public boolean shouldPause() { return false; }
-    @Override protected void applyBlur() {}               // we draw our own backdrop
     @Override public void renderBackground(DrawContext c, int mx, int my, float d) {}
 
     private void click() { client.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.6f)); }

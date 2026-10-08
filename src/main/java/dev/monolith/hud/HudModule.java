@@ -1,4 +1,5 @@
 package dev.monolith.hud;
+import dev.monolith.module.Module;
 
 import dev.monolith.module.*;
 import dev.monolith.render.*;
