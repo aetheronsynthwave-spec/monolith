@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1, "id": "monolith", "version": "${version}", "name": "Monolith Client",
+  "description": "Premium monochrome client.", "environment": "client",
+  "entrypoints": { "client": ["dev.monolith.Monolith"] },
+  "depends": { "fabricloader": ">=0.16.0", "minecraft": "~1.21.11", "java": ">=21", "fabric-api": "*" }
+}
