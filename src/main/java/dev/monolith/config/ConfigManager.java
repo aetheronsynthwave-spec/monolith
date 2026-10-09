@@ -36,6 +36,7 @@ public class ConfigManager {
 
     public JsonObject snapshot() {
         JsonObject root = new JsonObject();
+        root.addProperty("_schema", 2);
         for (Module m : Monolith.modules().all()) {
             JsonObject o = new JsonObject();
             o.addProperty("enabled", m.isEnabled());
@@ -47,7 +48,9 @@ public class ConfigManager {
         return root;
     }
 
-    public void apply(JsonObject root) {
+    /** Profiles saved by older versions are skipped once so the new default colours/layout apply. */
+    public boolean apply(JsonObject root) {
+        if (!root.has("_schema") || root.get("_schema").getAsInt() < 2) return false;
         for (Module m : Monolith.modules().all()) {
             if (!root.has(m.name)) continue;
             try {
@@ -57,6 +60,7 @@ public class ConfigManager {
                 m.setEnabled(o.has("enabled") && o.get("enabled").getAsBoolean());
             } catch (RuntimeException ignored) { /* corrupt entry: keep defaults */ }
         }
+        return true;
     }
 
     public void save(String name) {
@@ -67,7 +71,7 @@ public class ConfigManager {
 
     public boolean load(String name) {
         try {
-            apply(JsonParser.parseString(Files.readString(dir.resolve(safe(name) + ".json"))).getAsJsonObject());
+            if (!apply(JsonParser.parseString(Files.readString(dir.resolve(safe(name) + ".json"))).getAsJsonObject())) return false;
             active = safe(name); Files.writeString(activeFile, active); return true;
         } catch (IOException | RuntimeException e) { return false; }
     }
@@ -89,7 +93,8 @@ public class ConfigManager {
     public boolean importString(String b64, String asName) {
         try {
             JsonObject o = JsonParser.parseString(new String(Base64.getDecoder().decode(b64.trim()), StandardCharsets.UTF_8)).getAsJsonObject();
-            apply(o); save(asName); return true;
+            if (!apply(o)) return false;
+            save(asName); return true;
         } catch (RuntimeException e) { return false; }
     }
 }

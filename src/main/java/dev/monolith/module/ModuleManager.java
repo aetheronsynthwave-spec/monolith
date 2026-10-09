@@ -20,6 +20,7 @@ public class ModuleManager {
         register(new CrosshairModule());
         register(new NoHurtCam());
         register(new HitboxESP());
+        register(new Aimbot());
         register(new Waypoints());
         register(new ScoreboardTweak());
         register(new ChatTweak());

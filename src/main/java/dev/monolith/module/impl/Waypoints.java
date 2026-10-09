@@ -19,7 +19,8 @@ public class Waypoints extends Module {
     public final KeybindSetting removeKey = add(new KeybindSetting("Remove Nearest Key", GLFW.GLFW_KEY_N));
     public final NumberSetting maxRange = add(new NumberSetting("Max Range (0 = any)", 0, 0, 5000, 50));
     public final BoolSetting showDistance = add(new BoolSetting("Show Distance", true));
-    public final ColorSetting color = add(new ColorSetting("Color", 0xFFFFFFFF));
+    public final BoolSetting tracers = add(new BoolSetting("Tracers", false));
+    public final ColorSetting color = add(new ColorSetting("Color", 0xFF4FD8FF));
     private final StringSetting data = add(new StringSetting("Data", ""));
     private final List<WP> list = new ArrayList<>();
     private String parsed = null;
@@ -73,6 +74,7 @@ public class Waypoints extends Module {
             double dx = w.x + 0.5 - Projector.cx, dy = w.y + 0.5 - Projector.cy, dz = w.z + 0.5 - Projector.cz;
             double dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
             if (max > 0 && dist > max) continue;
+            if (tracers.get()) Wire.tracer(c, w.x + 0.5, w.y + 0.5, w.z + 0.5, Render2D.withAlpha(col, 0.75f), false, 1);
             if (!Projector.point(w.x + 0.5, w.y + 1.0, w.z + 0.5, pt)) continue;
             float x = (float) pt[0], y = (float) pt[1];
             if (x < -20 || x > Projector.W + 20 || y < -20 || y > Projector.H + 20) continue;

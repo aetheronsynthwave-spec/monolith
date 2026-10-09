@@ -52,4 +52,12 @@ public final class Projector {
         out[0] = (int) minX; out[1] = (int) minY; out[2] = Math.max(3, (int) (maxX - minX)); out[3] = Math.max(3, (int) (maxY - minY));
         return true;
     }
+
+    /** Camera-space coordinates {right, up, depth} written into out[off..off+2]. */
+    public static void toCam(double wx, double wy, double wz, double[] out, int off) {
+        double dx = wx - cx, dy = wy - cy, dz = wz - cz;
+        out[off] = dx * rx + dy * ry + dz * rz;
+        out[off + 1] = dx * ux + dy * uy + dz * uz;
+        out[off + 2] = dx * fx + dy * fy + dz * fz;
+    }
 }

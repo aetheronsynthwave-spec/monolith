@@ -83,4 +83,42 @@ public final class Render2D {
     public static void centered(DrawContext c, String s, float cx, float y, int col) { text(c, s, cx - width(s) / 2f, y, col); }
     public static boolean hover(double mx, double my, float x, float y, float w, float h) { return mx >= x && mx <= x + w && my >= y && my <= y + h; }
     public static float approach(float cur, float target, float dt, float speed) { return cur + (target - cur) * Math.min(1f, dt * speed); }
+
+    // ---------------- lines ----------------
+    /**
+     * Anti-gap line using axis-aligned runs: cost is min(|dx|,|dy|)+1 fills, so vertical/horizontal lines cost 1 fill.
+     * Fully clipped to the screen, so huge off-screen coordinates are safe.
+     */
+    public static void line(DrawContext c, double x0, double y0, double x1, double y1, int col, int th) {
+        if ((col >>> 24) == 0 || !Double.isFinite(x0 + y0 + x1 + y1)) return;
+        int W = c.getScaledWindowWidth(), H = c.getScaledWindowHeight();
+        if ((x0 < 0 && x1 < 0) || (x0 > W && x1 > W) || (y0 < 0 && y1 < 0) || (y0 > H && y1 > H)) return;
+        if (Math.abs(x1 - x0) >= Math.abs(y1 - y0)) runs(c, x0, y0, x1, y1, col, th, W, H, false);
+        else runs(c, y0, x0, y1, x1, col, th, H, W, true);
+    }
+
+    private static void runs(DrawContext c, double a0, double b0, double a1, double b1, int col, int th, int maxA, int maxB, boolean swap) {
+        double da = a1 - a0, db = b1 - b0;
+        int rowA = (int) Math.floor(b0), rowB = (int) Math.floor(b1);
+        if (rowA == rowB) {
+            if (rowA >= -1 && rowA <= maxB) fillRun(c, (int) Math.floor(Math.min(a0, a1)), (int) Math.floor(Math.max(a0, a1)), rowA, th, swap, maxA, col);
+            return;
+        }
+        int step = rowB > rowA ? 1 : -1, start = rowA, end = rowB;
+        if (step > 0) { start = Math.max(start, -1); end = Math.min(end, maxB); } else { start = Math.min(start, maxB); end = Math.max(end, -1); }
+        if ((step > 0 && start > end) || (step < 0 && start < end)) return;
+        double lo = Math.min(b0, b1), hi = Math.max(b0, b1);
+        for (int r = start; ; r += step) {
+            double ta = (Math.max(lo, Math.min(hi, r)) - b0) / db, tb = (Math.max(lo, Math.min(hi, r + 1)) - b0) / db;
+            double aa = a0 + da * ta, ab = a0 + da * tb;
+            fillRun(c, (int) Math.floor(Math.min(aa, ab)), (int) Math.floor(Math.max(aa, ab)), r, th, swap, maxA, col);
+            if (r == end) break;
+        }
+    }
+
+    private static void fillRun(DrawContext c, int lo, int hi, int row, int th, boolean swap, int maxA, int col) {
+        lo = Math.max(lo, -1); hi = Math.min(hi, maxA + 1);
+        if (lo > hi) return;
+        if (swap) c.fill(row, lo, row + th, hi + 1, col); else c.fill(lo, row, hi + 1, row + th, col);
+    }
 }

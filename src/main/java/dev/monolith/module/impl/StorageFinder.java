@@ -11,14 +11,14 @@ public class StorageFinder extends ESPModule {
     public final BoolSetting droppers = add(new BoolSetting("Droppers", true));
     public final BoolSetting dispensers = add(new BoolSetting("Dispensers", true));
     public final BoolSetting hoppers = add(new BoolSetting("Hoppers", true));
-    // Individual monochrome colours (grayscale by default).
-    public final ColorSetting cChest = add(new ColorSetting("Chest Color", 0xFFFFFFFF));
-    public final ColorSetting cTrapped = add(new ColorSetting("Trapped Color", 0xFFBDBDBD));
-    public final ColorSetting cBarrel = add(new ColorSetting("Barrel Color", 0xFFE0E0E0));
-    public final ColorSetting cShulker = add(new ColorSetting("Shulker Color", 0xFF9E9E9E));
-    public final ColorSetting cDropper = add(new ColorSetting("Dropper Color", 0xFF757575));
-    public final ColorSetting cDispenser = add(new ColorSetting("Dispenser Color", 0xFF8A8A8A));
-    public final ColorSetting cHopper = add(new ColorSetting("Hopper Color", 0xFF616161));
+    // Each type has its own colour (change in the GUI).
+    public final ColorSetting cChest = add(new ColorSetting("Chest Color", 0xFFFF9F43));
+    public final ColorSetting cTrapped = add(new ColorSetting("Trapped Color", 0xFFFF4D4D));
+    public final ColorSetting cBarrel = add(new ColorSetting("Barrel Color", 0xFFFFD93D));
+    public final ColorSetting cShulker = add(new ColorSetting("Shulker Color", 0xFFFF6FB5));
+    public final ColorSetting cDropper = add(new ColorSetting("Dropper Color", 0xFF4FD8FF));
+    public final ColorSetting cDispenser = add(new ColorSetting("Dispenser Color", 0xFF5C7CFF));
+    public final ColorSetting cHopper = add(new ColorSetting("Hopper Color", 0xFF5EE08A));
 
     public StorageFinder() { super("Storage Finder", "Highlights containers through walls."); }
 

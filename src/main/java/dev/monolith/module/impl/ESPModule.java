@@ -2,8 +2,7 @@ package dev.monolith.module.impl;
 
 import dev.monolith.module.Category;
 import dev.monolith.module.Module;
-import dev.monolith.render.Render2D;
-import dev.monolith.render.Projector;
+import dev.monolith.render.*;
 import dev.monolith.setting.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.gui.DrawContext;
@@ -12,26 +11,26 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Shared logic for block-entity ESP modules.
- * Block entities are cached through Fabric client events (see Monolith.java), so no chunk scanning per frame.
- * Drawing is screen-space: each block's 8 corners are projected onto the screen and a box is drawn around them.
- * Because it is just a 2D overlay, it is visible through walls and needs no fragile 3D render-pipeline code.
+ * Shared logic for block-entity ESP modules. Block entities are cached via Fabric client events (see Monolith.java),
+ * so there is no chunk scanning. Boxes are true 3D wireframes (clipped lines), visible through walls.
  */
 public abstract class ESPModule extends Module {
-    public enum Style { OUTLINE, FILLED, BOTH }
+    public enum Origin { BOTTOM, CROSSHAIR }
     protected final Set<BlockEntity> cache = ConcurrentHashMap.newKeySet();
-    public final EnumSetting<Style> style = add(new EnumSetting<>("Style", Style.BOTH));
     public final NumberSetting range = add(new NumberSetting("Range", 64, 8, 256, 1));
     public final BoolSetting fadeWithDistance = add(new BoolSetting("Distance Fade", true));
-    public final NumberSetting fillAlpha = add(new NumberSetting("Fill Opacity", 0.18, 0.02, 1, 0.01));
-    public final NumberSetting lineWidth = add(new NumberSetting("Line Width", 1.0, 1, 4, 1));
+    public final NumberSetting lineWidth = add(new NumberSetting("Line Width", 1, 1, 4, 1));
     public final BoolSetting glow = add(new BoolSetting("Glow", true));
     public final BoolSetting showDistance = add(new BoolSetting("Show Distance", false));
+    public final BoolSetting tracers = add(new BoolSetting("Tracers", false));
+    public final EnumSetting<Origin> tracerOrigin = add(new EnumSetting<>("Tracer Origin", Origin.BOTTOM));
+    public final NumberSetting tracerWidth = add(new NumberSetting("Tracer Width", 1, 1, 3, 1));
+    private final double[] pt = new double[3];
 
     protected ESPModule(String n, String d) {
         super(n, d, Category.RENDER);
         range.tooltip = "Maximum distance in blocks.";
-        glow.tooltip = "Soft light halo around each box.";
+        glow.tooltip = "Soft halo behind the outline (first 40 targets only).";
     }
 
     public void track(BlockEntity be) { if (accepts(be)) cache.add(be); }
@@ -41,33 +40,30 @@ public abstract class ESPModule extends Module {
     /** ARGB colour for this block entity; 0 means "do not draw". */
     protected abstract int colorFor(BlockEntity be);
 
-    private final int[] rect = new int[4];
-
     @Override public void onHud(DrawContext c, float delta) {
         if (!Projector.valid) return;
         double r2 = range.get() * range.get();
+        int drawn = 0, th = lineWidth.asInt();
         for (BlockEntity be : cache) {
             if (be.isRemoved()) continue;
             BlockPos p = be.getPos();
             double dx = p.getX() + 0.5 - Projector.cx, dy = p.getY() + 0.5 - Projector.cy, dz = p.getZ() + 0.5 - Projector.cz;
             double d2 = dx * dx + dy * dy + dz * dz;
-            if (d2 > r2) continue;                       // cheapest test first
+            if (d2 > r2) continue;
             int col = colorFor(be);
             if (col == 0) continue;
+            float fade = fadeWithDistance.get() ? (float) (1.0 - Math.sqrt(d2 / r2) * 0.65) : 1f;
+            if (tracers.get()) Wire.tracer(c, p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5, Render2D.withAlpha(col, 0.75f * fade), tracerOrigin.get() == Origin.CROSSHAIR, tracerWidth.asInt());
+
             Box box = new Box(p);
             var shape = be.getCachedState().getOutlineShape(mc.world, p);
             if (!shape.isEmpty()) box = shape.getBoundingBox().offset(p);
-            if (!Projector.box(box, rect)) continue;
-            int x = rect[0], y = rect[1], w = rect[2], h = rect[3];
-            float fade = fadeWithDistance.get() ? (float) (1.0 - Math.sqrt(d2 / r2) * 0.7) : 1f;
-
-            if (glow.get()) Render2D.glow(c, x, y, w, h, 2, 6, Render2D.withAlpha(col, fade));
-            if (style.get() != Style.OUTLINE) Render2D.rect(c, x, y, w, h, Render2D.withAlpha(col, fillAlpha.asFloat() * fade));
-            if (style.get() != Style.FILLED) {
-                int t = lineWidth.asInt();
-                for (int i = 0; i < t; i++) Render2D.outline(c, x + i, y + i, w - i * 2, h - i * 2, Render2D.withAlpha(col, fade));
+            if (glow.get() && drawn < 40) Wire.box(c, box, Render2D.withAlpha(col, 0.2f * fade), th + 2);
+            if (Wire.box(c, box, Render2D.withAlpha(col, fade), th)) {
+                if (showDistance.get() && Projector.point(p.getX() + 0.5, box.maxY + 0.35, p.getZ() + 0.5, pt))
+                    Render2D.centered(c, (int) Math.sqrt(d2) + "m", (float) pt[0], (float) pt[1] - 4, Render2D.withAlpha(col, fade));
             }
-            if (showDistance.get()) Render2D.centered(c, (int) Math.sqrt(d2) + "m", x + w / 2f, y - 10, Render2D.withAlpha(0xFFFFFFFF, fade));
+            if (++drawn >= 150) break;                    // hard cap keeps FPS stable in huge storage rooms
         }
     }
 }
