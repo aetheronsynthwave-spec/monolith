@@ -33,6 +33,10 @@ public abstract class Module {
     public void onEnable() {}
     public void onDisable() {}
     public void onTick() {}
+    /** Called at the START of every client tick, before the player processes input. */
+    public void onPreTick() {}
+    /** Called when leaving a world/server. */
+    public void onDisconnect() {}
     /** Called every rendered frame (even when the HUD is hidden) while enabled and in a world. Use for smooth animation. */
     public void onFrame(float delta) {}
     /** 2D overlay; only called while enabled and in a world. */

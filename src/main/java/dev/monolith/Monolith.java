@@ -12,6 +12,8 @@ import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import dev.monolith.render.Projector;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.*;
+import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
+import net.minecraft.util.ActionResult;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.RenderTickCounter;
@@ -34,6 +36,7 @@ public class Monolith implements ClientModInitializer {
         for (String n : new String[]{"FPS", "Coordinates", "Keystrokes", "CPS", "Armor HUD"}) modules.all().stream().filter(m -> m.name.equals(n)).forEach(m -> m.setEnabled(true));
         config.loadActive();
 
+        ClientTickEvents.START_CLIENT_TICK.register(client -> modules.preTick());
         ClientTickEvents.END_CLIENT_TICK.register(mc -> {
             modules.tick();
             boolean down = mc.getWindow() != null && GLFW.glfwGetKey(mc.getWindow().getHandle(), guiKey) == GLFW.GLFW_PRESS;
@@ -72,7 +75,14 @@ public class Monolith implements ClientModInitializer {
             for (ESPModule f : finders()) f.track(be); });
         net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientBlockEntityEvents.BLOCK_ENTITY_UNLOAD.register((be, w) -> {
             for (ESPModule f : finders()) f.untrack(be); });
-        ClientPlayConnectionEvents.DISCONNECT.register((h, mc) -> { for (ESPModule f : finders()) f.clear(); });
+        ClientPlayConnectionEvents.DISCONNECT.register((h, mc) -> { for (ESPModule f : finders()) f.clear(); for (Module m : modules.all()) m.onDisconnect(); });
+
+        // Criticals needs to act just before an attack is sent.
+        AttackEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
+            Criticals cr = modules.get(Criticals.class);
+            if (cr != null && player == MinecraftClient.getInstance().player) cr.onAttack(entity);
+            return ActionResult.PASS;
+        });
 
         LOGGER.info("Monolith ready: {} modules", modules.all().size());
     }

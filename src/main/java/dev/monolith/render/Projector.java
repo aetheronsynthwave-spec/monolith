@@ -16,9 +16,10 @@ public final class Projector {
         MinecraftClient mc = MinecraftClient.getInstance();
         valid = mc.player != null && mc.world != null;
         if (!valid) return;
-        Vec3d cam = mc.player.getCameraPosVec(delta);
+        net.minecraft.entity.Entity ce = mc.getCameraEntity() != null ? mc.getCameraEntity() : mc.player;
+        Vec3d cam = ce.getCameraPosVec(delta);
         cx = cam.x; cy = cam.y; cz = cam.z;
-        double yaw = Math.toRadians(mc.player.getYaw(delta)), pitch = Math.toRadians(mc.player.getPitch(delta));
+        double yaw = Math.toRadians(ce.getYaw(delta)), pitch = Math.toRadians(ce.getPitch(delta));
         fx = -Math.sin(yaw) * Math.cos(pitch); fy = -Math.sin(pitch); fz = Math.cos(yaw) * Math.cos(pitch);
         rx = -Math.cos(yaw); ry = 0; rz = -Math.sin(yaw);
         ux = ry * fz - rz * fy; uy = rz * fx - rx * fz; uz = rx * fy - ry * fx;

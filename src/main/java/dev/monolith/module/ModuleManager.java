@@ -21,6 +21,12 @@ public class ModuleManager {
         register(new NoHurtCam());
         register(new HitboxESP());
         register(new Aimbot());
+        register(new BowAimbot());
+        register(new AutoTotem());
+        register(new Criticals());
+        register(new Speed());
+        register(new XRay());
+        register(new Freecam());
         register(new Waypoints());
         register(new ScoreboardTweak());
         register(new ChatTweak());
@@ -43,6 +49,11 @@ public class ModuleManager {
     public List<Module> byCategory(Category c) { return modules.stream().filter(m -> m.category == c).toList(); }
     @SuppressWarnings("unchecked") public <T extends Module> T get(Class<T> c) {
         for (Module m : modules) if (c.isInstance(m)) return (T) m; return null; }
+
+    public void preTick() {
+        if (MinecraftClient.getInstance().player == null) return;
+        for (Module m : modules) if (m.isEnabled()) m.onPreTick();
+    }
 
     public void tick() {
         MinecraftClient mc = MinecraftClient.getInstance();
