@@ -33,6 +33,8 @@ public abstract class Module {
     public void onEnable() {}
     public void onDisable() {}
     public void onTick() {}
+    /** Called every rendered frame (even when the HUD is hidden) while enabled and in a world. Use for smooth animation. */
+    public void onFrame(float delta) {}
     /** 2D overlay; only called while enabled and in a world. */
     public void onHud(DrawContext ctx, float delta) {}
 }

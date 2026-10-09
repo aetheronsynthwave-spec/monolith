@@ -25,7 +25,7 @@ public class ClickGuiScreen extends Screen {
     private final List<String> tabs = new ArrayList<>();
     private String tab; private String search = "";
     private boolean searchFocus;
-    private float open = 0, scroll = 0, scrollTarget = 0;
+    private float open = 0, scroll = 0, scrollTarget = 0, tabAnim = 1;
     private long last = System.nanoTime();
     private final Map<Module, float[]> anim = new HashMap<>();   // [toggle, expand]
     private final Set<Module> expanded = new HashSet<>();
@@ -36,7 +36,7 @@ public class ClickGuiScreen extends Screen {
     // layout (recomputed every frame)
     private float px, py, pw, ph, railW = 120, top = 44;
 
-    public ClickGuiScreen() { super(Text.literal("Monolith")); for (Category c : Category.values()) tabs.add(c.label); tabs.add(HUDEDIT); tabs.add(PROFILES); tab = tabs.get(2); }
+    public ClickGuiScreen() { super(Text.literal("Monolith")); for (Category c : Category.values()) if (!Monolith.modules().byCategory(c).isEmpty()) tabs.add(c.label); tabs.add(HUDEDIT); tabs.add(PROFILES); tab = tabs.get(0); }
     @Override public boolean shouldPause() { return false; }
     @Override public void renderBackground(DrawContext c, int mx, int my, float d) {}
 
@@ -46,6 +46,7 @@ public class ClickGuiScreen extends Screen {
         long now = System.nanoTime(); float dt = (now - last) / 1e9f; last = now;
         open = Render2D.approach(open, 1, dt, 10);
         scroll = Render2D.approach(scroll, scrollTarget, dt, 14);
+        tabAnim = Render2D.approach(tabAnim, 1, dt, 12);
         tooltip = null;
 
         // responsive: panel is 62% x 72% of the screen, clamped.
@@ -55,7 +56,7 @@ public class ClickGuiScreen extends Screen {
 
         Render2D.rect(c, 0, 0, width, height, ((int) (0xA0 * e) << 24));
         var m = c.getMatrices();
-        Render2D.shadow(c, px, py, pw, ph, 10, 14, e);
+        Render2D.shadow(c, px, py, pw, ph, 10, 8, e);
         Render2D.roundedBordered(c, px, py, pw, ph, 10, Render2D.withAlpha(Theme.BG, e), Render2D.withAlpha(Theme.BORDER, e));
 
         // Rail
@@ -72,7 +73,7 @@ public class ClickGuiScreen extends Screen {
         }
         Render2D.rect(c, px + railW, py + 12, 1, ph - 24, Theme.BORDER);
 
-        float cx = px + railW + 14, cw = pw - railW - 28, cy = py + 14;
+        float cx = px + railW + 14, cw = pw - railW - 28, cy = py + 14 + (1 - tabAnim) * 10;
         if (tab.equals(PROFILES)) { drawProfiles(c, mx, my, cx, cy, cw); }
         else if (tab.equals(HUDEDIT)) { Render2D.text(c, "Drag HUD elements anywhere on screen.", cx, cy + 4, Theme.TEXT_DIM);
             Render2D.roundedBordered(c, cx, cy + 20, 110, 22, 6, Theme.CARD, Theme.BORDER); Render2D.centered(c, "Open editor", cx + 55, cy + 27, Theme.TEXT); }
@@ -95,7 +96,7 @@ public class ClickGuiScreen extends Screen {
     private float settingH(Setting<?> s) { return s instanceof NumberSetting || s instanceof ColorSetting ? 30 : 22; }
 
     private float cardHeight(Module m, float ex) {
-        float h = 34; float inner = 0; for (Setting<?> s : shown(m)) inner += settingH(s) + 2;
+        float h = 34; if (ex < 0.001f) return h; float inner = 0; for (Setting<?> s : shown(m)) inner += settingH(s) + 2;
         return h + inner * ex;
     }
 
@@ -108,12 +109,14 @@ public class ClickGuiScreen extends Screen {
         c.enableScissor((int) x - 2, (int) listTop, (int) (x + w + 2), (int) (listTop + listH));
         float cy = listTop - scroll, total = 0;
         for (Module mo : visibleModules()) {
-            float[] a = anim.computeIfAbsent(mo, k -> new float[]{mo.isEnabled() ? 1 : 0, 0});
+            float[] a = anim.computeIfAbsent(mo, k -> new float[]{mo.isEnabled() ? 1 : 0, 0, 0});
             a[0] = Render2D.approach(a[0], mo.isEnabled() ? 1 : 0, dt, 14);
             a[1] = Render2D.approach(a[1], expanded.contains(mo) ? 1 : 0, dt, 12);
             float h = cardHeight(mo, a[1]);
+            if (cy + h < listTop || cy > listTop + listH) { cy += h + 6; total += h + 6; continue; }   // off-screen: skip drawing
             boolean hov = Render2D.hover(mx, my, x, cy, w, 34) && my > listTop && my < listTop + listH;
-            Render2D.roundedBordered(c, x, cy, w, h, 8, hov ? Theme.CARD_HOVER : Theme.CARD, Render2D.lerpColor(Theme.BORDER, Theme.BORDER_HI, a[0]));
+            a[2] = Render2D.approach(a[2], hov ? 1 : 0, dt, 16);
+            Render2D.roundedBordered(c, x, cy, w, h, 8, Render2D.lerpColor(Theme.CARD, Theme.CARD_HOVER, a[2]), Render2D.lerpColor(Theme.BORDER, Theme.BORDER_HI, Math.max(a[0], a[2] * 0.6f)));
             Render2D.text(c, mo.name, x + 12, cy + 8, Theme.TEXT);
             Render2D.text(c, mo.category.label, x + 12 + Render2D.width(mo.name) + 8, cy + 8, 0xFF555555);
             Render2D.text(c, mo.description, x + 12, cy + 20, Theme.TEXT_DIM);
@@ -190,7 +193,7 @@ public class ClickGuiScreen extends Screen {
         double mx = ev.x(), my = ev.y(); int btn = ev.button();
         listening = null; searchFocus = false; profileFocus = false;
         float ty = py + top + 8;
-        for (String t : tabs) { if (hit(mx, my, px + 8, ty, railW - 16, 22)) { tab = t; scrollTarget = 0; click(); if (t.equals(HUDEDIT)) { } return true; } ty += 26; }
+        for (String t : tabs) { if (hit(mx, my, px + 8, ty, railW - 16, 22)) { if (!t.equals(tab)) tabAnim = 0; tab = t; scrollTarget = 0; click(); if (t.equals(HUDEDIT)) { } return true; } ty += 26; }
         float cx = px + railW + 14, cw = pw - railW - 28, cy = py + 14;
         if (tab.equals(HUDEDIT)) { if (hit(mx, my, cx, cy + 20, 110, 22)) { click(); client.setScreen(new HudEditorScreen(this)); } return true; }
         if (tab.equals(PROFILES)) { profileClick(mx, my, cx, cy, cw); return true; }
@@ -199,7 +202,7 @@ public class ClickGuiScreen extends Screen {
         if (my < listTop || my > listTop + listH) return true;
         float y = listTop - scroll;
         for (Module m : visibleModules()) {
-            float[] a = anim.computeIfAbsent(m, k -> new float[]{0, 0});
+            float[] a = anim.computeIfAbsent(m, k -> new float[]{0, 0, 0});
             float h = cardHeight(m, a[1]);
             if (hit(mx, my, cx, y, cw, 34)) { if (btn == 0) m.toggle(); else if (!expanded.remove(m)) expanded.add(m); click(); return true; }
             if (expanded.contains(m) && hit(mx, my, cx, y + 34, cw, h - 34)) {

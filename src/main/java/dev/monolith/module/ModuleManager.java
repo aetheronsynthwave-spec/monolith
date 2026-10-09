@@ -15,6 +15,15 @@ public class ModuleManager {
         register(new SpawnerFinder());
         register(new Fullbright());
         register(new ToggleSprint());
+        register(new ToggleSneak());
+        register(new Zoom());
+        register(new CrosshairModule());
+        register(new NoHurtCam());
+        register(new HitboxESP());
+        register(new Waypoints());
+        register(new ScoreboardTweak());
+        register(new ChatTweak());
+        register(new TabListTweak());
         register(new FpsHud());
         register(new PingHud());
         register(new CoordsHud());

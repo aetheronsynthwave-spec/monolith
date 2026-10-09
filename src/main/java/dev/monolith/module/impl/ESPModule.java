@@ -3,6 +3,7 @@ package dev.monolith.module.impl;
 import dev.monolith.module.Category;
 import dev.monolith.module.Module;
 import dev.monolith.render.Render2D;
+import dev.monolith.render.Projector;
 import dev.monolith.setting.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.gui.DrawContext;
@@ -40,42 +41,24 @@ public abstract class ESPModule extends Module {
     /** ARGB colour for this block entity; 0 means "do not draw". */
     protected abstract int colorFor(BlockEntity be);
 
-    @Override public void onHud(DrawContext c, float delta) {
-        if (mc.player == null || mc.world == null) return;
-        Vec3d cam = mc.player.getCameraPosVec(delta);
-        double yaw = Math.toRadians(mc.player.getYaw(delta)), pitch = Math.toRadians(mc.player.getPitch(delta));
-        // Camera basis vectors (forward / right / up).
-        double fx = -Math.sin(yaw) * Math.cos(pitch), fy = -Math.sin(pitch), fz = Math.cos(yaw) * Math.cos(pitch);
-        double rx = -Math.cos(yaw), ry = 0, rz = -Math.sin(yaw);
-        double ux = ry * fz - rz * fy, uy = rz * fx - rx * fz, uz = rx * fy - ry * fx;
-        int W = c.getScaledWindowWidth(), H = c.getScaledWindowHeight();
-        double fov = Math.toRadians(mc.options.getFov().getValue());
-        double focal = (H / 2.0) / Math.tan(fov / 2.0);
-        double r2 = range.get() * range.get();
+    private final int[] rect = new int[4];
 
+    @Override public void onHud(DrawContext c, float delta) {
+        if (!Projector.valid) return;
+        double r2 = range.get() * range.get();
         for (BlockEntity be : cache) {
             if (be.isRemoved()) continue;
             BlockPos p = be.getPos();
-            double d2 = p.getSquaredDistance(cam);
-            if (d2 > r2) continue;
+            double dx = p.getX() + 0.5 - Projector.cx, dy = p.getY() + 0.5 - Projector.cy, dz = p.getZ() + 0.5 - Projector.cz;
+            double d2 = dx * dx + dy * dy + dz * dz;
+            if (d2 > r2) continue;                       // cheapest test first
             int col = colorFor(be);
             if (col == 0) continue;
-
-            // Centre must be in front of the camera.
-            double cdx = p.getX() + 0.5 - cam.x, cdy = p.getY() + 0.5 - cam.y, cdz = p.getZ() + 0.5 - cam.z;
-            if (cdx * fx + cdy * fy + cdz * fz < 0.1) continue;
-
-            double minX = 1e9, minY = 1e9, maxX = -1e9, maxY = -1e9;
-            for (int i = 0; i < 8; i++) {
-                double dx = p.getX() + (i & 1) - cam.x, dy = p.getY() + ((i >> 1) & 1) - cam.y, dz = p.getZ() + ((i >> 2) & 1) - cam.z;
-                double z = Math.max(0.1, dx * fx + dy * fy + dz * fz);
-                double sx = W / 2.0 + (dx * rx + dy * ry + dz * rz) / z * focal;
-                double sy = H / 2.0 - (dx * ux + dy * uy + dz * uz) / z * focal;
-                minX = Math.min(minX, sx); maxX = Math.max(maxX, sx); minY = Math.min(minY, sy); maxY = Math.max(maxY, sy);
-            }
-            if (maxX < 0 || minX > W || maxY < 0 || minY > H) continue;
-
-            int x = (int) minX, y = (int) minY, w = Math.max(3, (int) (maxX - minX)), h = Math.max(3, (int) (maxY - minY));
+            Box box = new Box(p);
+            var shape = be.getCachedState().getOutlineShape(mc.world, p);
+            if (!shape.isEmpty()) box = shape.getBoundingBox().offset(p);
+            if (!Projector.box(box, rect)) continue;
+            int x = rect[0], y = rect[1], w = rect[2], h = rect[3];
             float fade = fadeWithDistance.get() ? (float) (1.0 - Math.sqrt(d2 / r2) * 0.7) : 1f;
 
             if (glow.get()) Render2D.glow(c, x, y, w, h, 2, 6, Render2D.withAlpha(col, fade));
