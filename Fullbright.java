@@ -1,16 +1,11 @@
-package dev.monolith.module.impl;
-import dev.monolith.module.Module;
-import dev.monolith.module.*;
-import net.minecraft.entity.effect.*;
-/** Client-side night vision. (A gamma mixin would avoid the effect icon; this needs no mixin.) */
 public class Fullbright extends Module {
+    public final NumberSetting gamma = add(new NumberSetting("Gamma", 12, 2, 16, 1));
+    private double saved = Double.NaN;
     public Fullbright() { super("Fullbright", "See clearly in the dark.", Category.RENDER); }
-    @Override public void onTick() {
-        if (mc.player.hasStatusEffect(StatusEffects.NIGHT_VISION)) {
-            StatusEffectInstance i = mc.player.getStatusEffect(StatusEffects.NIGHT_VISION);
-            if (i.getDuration() > 400) return;
-        }
-        mc.player.addStatusEffect(new StatusEffectInstance(StatusEffects.NIGHT_VISION, 1000, 0, false, false, false));
+    @Override public void onFrame(float d) {
+        var opt = mc.options.getGamma();
+        if (Double.isNaN(saved)) saved = opt.getValue();
+        if (opt.value != gamma.get()) opt.value = gamma.get();   // bypasses the 0..1 clamp (needs the widener)
     }
-    @Override public void onDisable() { if (mc.player != null) mc.player.removeStatusEffect(StatusEffects.NIGHT_VISION); }
+    @Override public void onDisable() { if (!Double.isNaN(saved)) { mc.options.getGamma().value = saved; saved = Double.NaN; } }
 }
