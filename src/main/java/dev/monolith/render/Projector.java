@@ -1,9 +1,9 @@
 package dev.monolith.render;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.class_238;
+import net.minecraft.class_243;
+import net.minecraft.class_310;
+import net.minecraft.class_332;
 
 /** Projects world positions onto the (GUI-scaled) screen. Camera basis is computed once per frame and shared by every ESP-style module. */
 public final class Projector {
@@ -12,19 +12,19 @@ public final class Projector {
     public static double cx, cy, cz, fx, fy, fz, rx, ry, rz, ux, uy, uz, focal;
     public static int W, H;
 
-    public static void update(DrawContext c, float delta) {
-        MinecraftClient mc = MinecraftClient.getInstance();
-        valid = mc.player != null && mc.world != null;
+    public static void update(class_332 c, float delta) {
+        class_310 mc = class_310.method_1551();
+        valid = mc.field_1724 != null && mc.field_1687 != null;
         if (!valid) return;
-        net.minecraft.entity.Entity ce = mc.getCameraEntity() != null ? mc.getCameraEntity() : mc.player;
-        Vec3d cam = ce.getCameraPosVec(delta);
-        cx = cam.x; cy = cam.y; cz = cam.z;
-        double yaw = Math.toRadians(ce.getYaw(delta)), pitch = Math.toRadians(ce.getPitch(delta));
+        net.minecraft.class_1297 ce = mc.method_1560() != null ? mc.method_1560() : mc.field_1724;
+        class_243 cam = ce.method_5836(delta);
+        cx = cam.field_1352; cy = cam.field_1351; cz = cam.field_1350;
+        double yaw = Math.toRadians(ce.method_5705(delta)), pitch = Math.toRadians(ce.method_5695(delta));
         fx = -Math.sin(yaw) * Math.cos(pitch); fy = -Math.sin(pitch); fz = Math.cos(yaw) * Math.cos(pitch);
         rx = -Math.cos(yaw); ry = 0; rz = -Math.sin(yaw);
         ux = ry * fz - rz * fy; uy = rz * fx - rx * fz; uz = rx * fy - ry * fx;
-        W = c.getScaledWindowWidth(); H = c.getScaledWindowHeight();
-        focal = (H / 2.0) / Math.tan(Math.toRadians(mc.options.getFov().getValue()) / 2.0);
+        W = c.method_51421(); H = c.method_51443();
+        focal = (H / 2.0) / Math.tan(Math.toRadians(mc.field_1690.method_41808().method_41753()) / 2.0);
     }
 
     /** out = {screenX, screenY, depth}. Returns false when the point is behind the camera. */
@@ -39,12 +39,12 @@ public final class Projector {
     }
 
     /** Screen rectangle {x, y, w, h} around a world box. False if behind the camera or fully off-screen. */
-    public static boolean box(Box b, int[] out) {
-        double mx = (b.minX + b.maxX) / 2 - cx, my = (b.minY + b.maxY) / 2 - cy, mz = (b.minZ + b.maxZ) / 2 - cz;
+    public static boolean box(class_238 b, int[] out) {
+        double mx = (b.field_1323 + b.field_1320) / 2 - cx, my = (b.field_1322 + b.field_1325) / 2 - cy, mz = (b.field_1321 + b.field_1324) / 2 - cz;
         if (mx * fx + my * fy + mz * fz < 0.1) return false;
         double minX = 1e9, minY = 1e9, maxX = -1e9, maxY = -1e9;
         for (int i = 0; i < 8; i++) {
-            double dx = ((i & 1) == 0 ? b.minX : b.maxX) - cx, dy = ((i & 2) == 0 ? b.minY : b.maxY) - cy, dz = ((i & 4) == 0 ? b.minZ : b.maxZ) - cz;
+            double dx = ((i & 1) == 0 ? b.field_1323 : b.field_1320) - cx, dy = ((i & 2) == 0 ? b.field_1322 : b.field_1325) - cy, dz = ((i & 4) == 0 ? b.field_1321 : b.field_1324) - cz;
             double z = Math.max(0.1, dx * fx + dy * fy + dz * fz);
             double sx = W / 2.0 + (dx * rx + dy * ry + dz * rz) / z * focal, sy = H / 2.0 - (dx * ux + dy * uy + dz * uz) / z * focal;
             if (sx < minX) minX = sx; if (sx > maxX) maxX = sx; if (sy < minY) minY = sy; if (sy > maxY) maxY = sy;

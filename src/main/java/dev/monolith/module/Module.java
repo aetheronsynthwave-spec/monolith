@@ -1,13 +1,13 @@
 package dev.monolith.module;
 
 import dev.monolith.setting.*;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
 import java.util.*;
+import net.minecraft.class_310;
+import net.minecraft.class_332;
 
 /** Base class for all features. Add settings in the constructor via {@link #add}; the GUI picks them up automatically. */
 public abstract class Module {
-    protected static final MinecraftClient mc = MinecraftClient.getInstance();
+    protected static final class_310 mc = class_310.method_1551();
     public final String name, description;
     public final Category category;
     public final KeybindSetting keybind = new KeybindSetting("Keybind", -1);
@@ -40,5 +40,7 @@ public abstract class Module {
     /** Called every rendered frame (even when the HUD is hidden) while enabled and in a world. Use for smooth animation. */
     public void onFrame(float delta) {}
     /** 2D overlay; only called while enabled and in a world. */
-    public void onHud(DrawContext ctx, float delta) {}
+    public void onHud(class_332 ctx, float delta) {}
+    /** World-space drawing (Render3D.*). Called once per frame, after entities are drawn, only while enabled and in a world. */
+    public void onRender3D(float delta) {}
 }

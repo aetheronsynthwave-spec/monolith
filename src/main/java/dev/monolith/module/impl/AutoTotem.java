@@ -3,9 +3,9 @@ package dev.monolith.module.impl;
 import dev.monolith.module.Category;
 import dev.monolith.module.Module;
 import dev.monolith.setting.*;
-import net.minecraft.client.gui.screen.ingame.InventoryScreen;
-import net.minecraft.item.Items;
-import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.class_1713;
+import net.minecraft.class_1802;
+import net.minecraft.class_490;
 
 /** Keeps a Totem of Undying in your off-hand by swapping one in from your inventory. */
 public class AutoTotem extends Module {
@@ -19,16 +19,16 @@ public class AutoTotem extends Module {
     }
 
     @Override public void onTick() {
-        if (mc.interactionManager == null) return;
+        if (mc.field_1761 == null) return;
         if (cooldown > 0) { cooldown--; return; }
-        if (mc.currentScreen != null && !(mc.currentScreen instanceof InventoryScreen)) return;   // not while another container is open
-        if (mc.player.getOffHandStack().isOf(Items.TOTEM_OF_UNDYING)) return;
-        if (mc.player.getHealth() + mc.player.getAbsorptionAmount() > belowHealth.get()) return;
+        if (mc.field_1755 != null && !(mc.field_1755 instanceof class_490)) return;   // not while another container is open
+        if (mc.field_1724.method_6079().method_31574(class_1802.field_8288)) return;
+        if (mc.field_1724.method_6032() + mc.field_1724.method_6067() > belowHealth.get()) return;
         int slot = -1;
-        for (int i = 0; i < 36; i++) if (mc.player.getInventory().getStack(i).isOf(Items.TOTEM_OF_UNDYING)) { slot = i; break; }   // hotbar first
+        for (int i = 0; i < 36; i++) if (mc.field_1724.method_31548().method_5438(i).method_31574(class_1802.field_8288)) { slot = i; break; }   // hotbar first
         if (slot < 0) return;
         int handlerSlot = slot < 9 ? 36 + slot : slot;           // inventory index -> player screen handler slot
-        mc.interactionManager.clickSlot(mc.player.playerScreenHandler.syncId, handlerSlot, 40, SlotActionType.SWAP, mc.player);   // button 40 = swap with off-hand
+        mc.field_1761.method_2906(mc.field_1724.field_7498.field_7763, handlerSlot, 40, class_1713.field_7791, mc.field_1724);   // button 40 = swap with off-hand
         cooldown = delay.asInt();
     }
 }

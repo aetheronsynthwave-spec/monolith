@@ -4,17 +4,23 @@ import dev.monolith.module.Category;
 import dev.monolith.module.Module;
 import dev.monolith.render.*;
 import dev.monolith.setting.*;
-import net.minecraft.client.gui.DrawContext;
+import net.minecraft.class_1297;
+import net.minecraft.class_1304;
+import net.minecraft.class_1309;
+import net.minecraft.class_1531;
+import net.minecraft.class_1542;
+import net.minecraft.class_1588;
+import net.minecraft.class_1657;
+import net.minecraft.class_1799;
+import net.minecraft.class_238;
+import net.minecraft.class_243;
+import net.minecraft.class_332;
 import net.minecraft.entity.*;
-import net.minecraft.entity.decoration.ArmorStandEntity;
-import net.minecraft.entity.mob.HostileEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.*;
 
 /** Entity ESP: 3D outlines, health bars, names, equipment icons and dropped items, through walls, with per-type colours and tracers. */
 public class HitboxESP extends Module {
-    private static final EquipmentSlot[] GEAR = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET, EquipmentSlot.MAINHAND};
+    private static final class_1304[] GEAR = {class_1304.field_6169, class_1304.field_6174, class_1304.field_6172, class_1304.field_6166, class_1304.field_6173};
     public final BoolSetting players = add(new BoolSetting("Players", true));
     public final BoolSetting hostiles = add(new BoolSetting("Hostile Mobs", true));
     public final BoolSetting passives = add(new BoolSetting("Other Mobs", false));
@@ -37,58 +43,58 @@ public class HitboxESP extends Module {
         equipment.tooltip = "Armor and held item icons above nearby players (closest 10).";
     }
 
-    @Override public void onHud(DrawContext c, float delta) {
+    @Override public void onHud(class_332 c, float delta) {
         if (!Projector.valid) return;
         double r2 = range.get() * range.get();
         int drawn = 0, itemsDrawn = 0, gearDrawn = 0, th = lineWidth.asInt();
         boolean fromCross = tracerOrigin.get() == ESPModule.Origin.CROSSHAIR;
-        for (Entity e : mc.world.getEntities()) {
-            if (e == mc.player) continue;
-            double dx = e.getX() - Projector.cx, dy = e.getY() - Projector.cy, dz = e.getZ() - Projector.cz;
+        for (class_1297 e : mc.field_1687.method_18112()) {
+            if (e == mc.field_1724) continue;
+            double dx = e.method_23317() - Projector.cx, dy = e.method_23318() - Projector.cy, dz = e.method_23321() - Projector.cz;
             double d2 = dx * dx + dy * dy + dz * dz;
             if (d2 > r2) continue;
             float fade = (float) (1.0 - Math.sqrt(d2 / r2) * 0.6);
 
-            if (e instanceof ItemEntity ie) {                                // ---- dropped items
+            if (e instanceof class_1542 ie) {                                // ---- dropped items
                 if (!items.get() || itemsDrawn >= 60) continue;
                 itemsDrawn++;
-                Vec3d lp = e.getLerpedPos(delta);
-                Box b = e.getDimensions(e.getPose()).getBoxAt(lp.x, lp.y, lp.z);
+                class_243 lp = e.method_30950(delta);
+                class_238 b = e.method_18377(e.method_18376()).method_30231(lp.field_1352, lp.field_1351, lp.field_1350);
                 int col = cItem.get();
-                if (tracers.get()) Wire.tracer(c, lp.x, lp.y + 0.2, lp.z, Render2D.withAlpha(col, 0.6f * fade), fromCross, 1);
+                if (tracers.get()) Wire.tracer(c, lp.field_1352, lp.field_1351 + 0.2, lp.field_1350, Render2D.withAlpha(col, 0.6f * fade), fromCross, 1);
                 if (Wire.box(c, b, Render2D.withAlpha(col, fade), th) && names.get() && Projector.box(b, rect)) {
-                    ItemStack st = ie.getStack();
-                    Render2D.centered(c, st.getName().getString() + (st.getCount() > 1 ? " x" + st.getCount() : ""), rect[0] + rect[2] / 2f, rect[1] - 10, Render2D.withAlpha(col, fade));
+                    class_1799 st = ie.method_6983();
+                    Render2D.centered(c, st.method_7964().getString() + (st.method_7947() > 1 ? " x" + st.method_7947() : ""), rect[0] + rect[2] / 2f, rect[1] - 10, Render2D.withAlpha(col, fade));
                 }
                 continue;
             }
 
-            if (!(e instanceof LivingEntity le) || e instanceof ArmorStandEntity || !le.isAlive()) continue;
-            int col; boolean pl = e instanceof PlayerEntity;
+            if (!(e instanceof class_1309 le) || e instanceof class_1531 || !le.method_5805()) continue;
+            int col; boolean pl = e instanceof class_1657;
             if (pl) { if (!players.get()) continue; col = cPlayer.get(); }
-            else if (e instanceof HostileEntity) { if (!hostiles.get()) continue; col = cHostile.get(); }
+            else if (e instanceof class_1588) { if (!hostiles.get()) continue; col = cHostile.get(); }
             else { if (!passives.get()) continue; col = cOther.get(); }
-            Vec3d lp = e.getLerpedPos(delta);                               // interpolated: smooth between ticks
-            Box b = e.getDimensions(e.getPose()).getBoxAt(lp.x, lp.y, lp.z);
-            if (tracers.get()) Wire.tracer(c, lp.x, lp.y + e.getHeight() * 0.5, lp.z, Render2D.withAlpha(col, 0.75f * fade), fromCross, 1);
+            class_243 lp = e.method_30950(delta);                               // interpolated: smooth between ticks
+            class_238 b = e.method_18377(e.method_18376()).method_30231(lp.field_1352, lp.field_1351, lp.field_1350);
+            if (tracers.get()) Wire.tracer(c, lp.field_1352, lp.field_1351 + e.method_17682() * 0.5, lp.field_1350, Render2D.withAlpha(col, 0.75f * fade), fromCross, 1);
             if (!Wire.box(c, b, Render2D.withAlpha(col, fade), th)) continue;
             if ((names.get() || health.get() || equipment.get()) && Projector.box(b, rect)) {
                 int x = rect[0], y = rect[1], w = rect[2], h = rect[3];
-                if (names.get()) Render2D.centered(c, e.getName().getString(), x + w / 2f, y - 10, Render2D.withAlpha(col, fade));
+                if (names.get()) Render2D.centered(c, e.method_5477().getString(), x + w / 2f, y - 10, Render2D.withAlpha(col, fade));
                 if (health.get()) {
-                    float f = Math.max(0, Math.min(1, le.getHealth() / le.getMaxHealth()));
+                    float f = Math.max(0, Math.min(1, le.method_6032() / le.method_6063()));
                     Render2D.rect(c, x - 4, y, 2, h, 0x80000000);
                     Render2D.rect(c, x - 4, y + h * (1 - f), 2, h * f, Render2D.withAlpha(col, fade));
                 }
                 if (pl && equipment.get() && d2 < 32 * 32 && gearDrawn < 10) {
                     gearDrawn++;
                     float scale = 0.6f, cell = 16 * scale, gx = x + w / 2f - cell * GEAR.length / 2f, gy = y - 10 - cell - 2;
-                    var m = c.getMatrices();
+                    var m = c.method_51448();
                     for (int i = 0; i < GEAR.length; i++) {
-                        ItemStack st = le.getEquippedStack(GEAR[i]);
-                        if (st.isEmpty()) continue;
+                        class_1799 st = le.method_6118(GEAR[i]);
+                        if (st.method_7960()) continue;
                         m.pushMatrix(); m.translate(gx + i * cell, gy); m.scale(scale, scale);
-                        c.drawItem(st, 0, 0);
+                        c.method_51427(st, 0, 0);
                         m.popMatrix();
                     }
                 }

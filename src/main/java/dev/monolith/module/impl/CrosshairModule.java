@@ -4,7 +4,7 @@ import dev.monolith.module.Category;
 import dev.monolith.module.Module;
 import dev.monolith.render.Render2D;
 import dev.monolith.setting.*;
-import net.minecraft.client.gui.DrawContext;
+import net.minecraft.class_332;
 
 /** Replaces the vanilla crosshair (see HudElementRegistry hook in Monolith.java). */
 public class CrosshairModule extends Module {
@@ -19,12 +19,12 @@ public class CrosshairModule extends Module {
 
     public CrosshairModule() { super("Crosshair", "Custom monochrome crosshair.", Category.RENDER); }
 
-    public void draw(DrawContext c) {
-        if (mc.currentScreen != null || mc.player == null) return;
-        int cx = c.getScaledWindowWidth() / 2, cy = c.getScaledWindowHeight() / 2;
+    public void draw(class_332 c) {
+        if (mc.field_1755 != null || mc.field_1724 == null) return;
+        int cx = c.method_51421() / 2, cy = c.method_51443() / 2;
         int s = size.asInt(), t = thickness.asInt(), col = color.get(), o = 0xB0000000;
         int g = gap.asInt();
-        if (dynamic.get()) g += Math.min(8, (int) (mc.player.getVelocity().horizontalLength() * 20));
+        if (dynamic.get()) g += Math.min(8, (int) (mc.field_1724.method_18798().method_37267() * 20));
         int h = t / 2;
         Shape sh = shape.get();
         boolean bars = sh != Shape.DOT;
@@ -37,7 +37,7 @@ public class CrosshairModule extends Module {
         if (sh == Shape.DOT || sh == Shape.PLUS_DOT) bar(c, cx - h, cy - h, t, t, col, o);
     }
 
-    private void bar(DrawContext c, int x, int y, int w, int h, int col, int outCol) {
+    private void bar(class_332 c, int x, int y, int w, int h, int col, int outCol) {
         if (outline.get()) Render2D.rect(c, x - 1, y - 1, w + 2, h + 2, outCol);
         Render2D.rect(c, x, y, w, h, col);
     }

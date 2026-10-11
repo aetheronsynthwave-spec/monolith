@@ -1,6 +1,6 @@
 package dev.monolith.hud;
-import net.minecraft.client.gui.DrawContext;
 import net.minecraft.util.math.*;
+import net.minecraft.class_332;
 import net.minecraft.entity.*;
 import net.minecraft.entity.effect.*;
 import net.minecraft.entity.player.*;
@@ -14,11 +14,11 @@ public class CpsHud extends HudModule {
     public CpsHud() { super("CPS", "Clicks per second.", 0.01, 0.22); }
     /** Polled each tick (no mixin needed). */
     @Override public void onTick() {
-        long h = mc.getWindow().getHandle(); long now = System.currentTimeMillis();
+        long h = mc.method_22683().method_4490(); long now = System.currentTimeMillis();
         boolean l = org.lwjgl.glfw.GLFW.glfwGetMouseButton(h, 0) == 1, r = org.lwjgl.glfw.GLFW.glfwGetMouseButton(h, 1) == 1;
         if (l && !ld) left.add(now); if (r && !rd) right.add(now); ld = l; rd = r;
         while (!left.isEmpty() && now - left.peek() > 1000) left.poll();
         while (!right.isEmpty() && now - right.peek() > 1000) right.poll();
     }
-    @Override protected void draw(DrawContext c) { line(c, "CPS", left.size() + " | " + right.size()); }
+    @Override protected void draw(class_332 c) { line(c, "CPS", left.size() + " | " + right.size()); }
 }

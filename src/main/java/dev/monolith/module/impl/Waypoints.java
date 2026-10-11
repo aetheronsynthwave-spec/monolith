@@ -4,10 +4,10 @@ import dev.monolith.module.Category;
 import dev.monolith.module.Module;
 import dev.monolith.render.*;
 import dev.monolith.setting.*;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 import java.util.*;
+import net.minecraft.class_2561;
+import net.minecraft.class_332;
 
 /**
  * Waypoints saved inside the profile (the hidden "Data" setting). Press the Add key to drop one at your feet,
@@ -44,28 +44,28 @@ public class Waypoints extends Module {
         for (WP w : list) sb.append(w.name).append('|').append(w.dim).append('|').append(w.x).append('|').append(w.y).append('|').append(w.z).append(';');
         data.set(sb.toString()); parsed = data.get();
     }
-    private String dim() { return mc.world.getRegistryKey().getValue().toString(); }
-    private static boolean down(int key) { return key > 0 && key <= GLFW.GLFW_KEY_LAST && GLFW.glfwGetKey(net.minecraft.client.MinecraftClient.getInstance().getWindow().getHandle(), key) == GLFW.GLFW_PRESS; }
+    private String dim() { return mc.field_1687.method_27983().method_29177().toString(); }
+    private static boolean down(int key) { return key > 0 && key <= GLFW.GLFW_KEY_LAST && GLFW.glfwGetKey(net.minecraft.class_310.method_1551().method_22683().method_4490(), key) == GLFW.GLFW_PRESS; }
 
     @Override public void onTick() {
         sync();
-        if (mc.currentScreen != null) return;
+        if (mc.field_1755 != null) return;
         boolean a = down(addKey.get()), r = down(removeKey.get());
         if (a && !addDown) {
-            list.add(new WP("Waypoint " + (list.size() + 1), dim(), (int) Math.floor(mc.player.getX()), (int) Math.floor(mc.player.getY()), (int) Math.floor(mc.player.getZ())));
-            save(); mc.player.sendMessage(Text.literal("Waypoint added"), true);
+            list.add(new WP("Waypoint " + (list.size() + 1), dim(), (int) Math.floor(mc.field_1724.method_23317()), (int) Math.floor(mc.field_1724.method_23318()), (int) Math.floor(mc.field_1724.method_23321())));
+            save(); mc.field_1724.method_7353(class_2561.method_43470("Waypoint added"), true);
         }
         if (r && !removeDown) {
             WP best = null; double bd = 64;
             for (WP w : list) { if (!w.dim.equals(dim())) continue;
-                double dx = w.x + 0.5 - mc.player.getX(), dy = w.y - mc.player.getY(), dz = w.z + 0.5 - mc.player.getZ(); double d = dx * dx + dy * dy + dz * dz;
+                double dx = w.x + 0.5 - mc.field_1724.method_23317(), dy = w.y - mc.field_1724.method_23318(), dz = w.z + 0.5 - mc.field_1724.method_23321(); double d = dx * dx + dy * dy + dz * dz;
                 if (d < bd) { bd = d; best = w; } }
-            if (best != null) { list.remove(best); save(); mc.player.sendMessage(Text.literal("Waypoint removed"), true); }
+            if (best != null) { list.remove(best); save(); mc.field_1724.method_7353(class_2561.method_43470("Waypoint removed"), true); }
         }
         addDown = a; removeDown = r;
     }
 
-    @Override public void onHud(DrawContext c, float delta) {
+    @Override public void onHud(class_332 c, float delta) {
         if (!Projector.valid) return;
         sync();
         String dim = dim(); double max = maxRange.get(); int col = color.get();

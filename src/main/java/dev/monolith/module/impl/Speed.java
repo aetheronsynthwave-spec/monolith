@@ -3,7 +3,7 @@ package dev.monolith.module.impl;
 import dev.monolith.module.Category;
 import dev.monolith.module.Module;
 import dev.monolith.setting.*;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.class_243;
 
 /** BHOP: auto-timed jumps with boosted ground speed and air control. GROUND: just boosts walking speed. */
 public class Speed extends Module {
@@ -17,23 +17,23 @@ public class Speed extends Module {
     public Speed() { super("Speed", "Bunny-hop and ground speed boost.", Category.MOVEMENT); autoJump.visibleWhen(() -> mode.get() == Mode.BHOP); airControl.visibleWhen(() -> mode.get() == Mode.BHOP); }
 
     @Override public void onTick() {
-        var p = mc.player;
-        if (p.isSneaking() || p.isTouchingWater() || p.isInLava() || p.isClimbing() || p.getAbilities().flying) return;
-        float f = (mc.options.forwardKey.isPressed() ? 1 : 0) - (mc.options.backKey.isPressed() ? 1 : 0);
-        float s = (mc.options.leftKey.isPressed() ? 1 : 0) - (mc.options.rightKey.isPressed() ? 1 : 0);
+        var p = mc.field_1724;
+        if (p.method_5715() || p.method_5799() || p.method_5771() || p.method_6101() || p.method_31549().field_7479) return;
+        float f = (mc.field_1690.field_1894.method_1434() ? 1 : 0) - (mc.field_1690.field_1881.method_1434() ? 1 : 0);
+        float s = (mc.field_1690.field_1913.method_1434() ? 1 : 0) - (mc.field_1690.field_1849.method_1434() ? 1 : 0);
         if (f == 0 && s == 0) return;
-        double yaw = Math.toRadians(p.getYaw());
+        double yaw = Math.toRadians(p.method_36454());
         double dx = -Math.sin(yaw) * f + Math.cos(yaw) * s, dz = Math.cos(yaw) * f + Math.sin(yaw) * s;
         double len = Math.hypot(dx, dz); dx /= len; dz /= len;
-        Vec3d v = p.getVelocity();
+        class_243 v = p.method_18798();
         double target = BASE * multiplier.get();
-        p.setSprinting(true);
-        if (mode.get() == Mode.GROUND) { if (p.isOnGround()) p.setVelocity(dx * target, v.y, dz * target); return; }
-        if (p.isOnGround()) {
-            p.setVelocity(dx * target, autoJump.get() ? 0.42 : v.y, dz * target);
+        p.method_5728(true);
+        if (mode.get() == Mode.GROUND) { if (p.method_24828()) p.method_18800(dx * target, v.field_1351, dz * target); return; }
+        if (p.method_24828()) {
+            p.method_18800(dx * target, autoJump.get() ? 0.42 : v.field_1351, dz * target);
         } else if (airControl.get()) {
-            double sp = Math.max(Math.hypot(v.x, v.z) * 0.998, BASE);       // keep momentum, steer toward the keys
-            p.setVelocity(dx * sp, v.y, dz * sp);
+            double sp = Math.max(Math.hypot(v.field_1352, v.field_1350) * 0.998, BASE);       // keep momentum, steer toward the keys
+            p.method_18800(dx * sp, v.field_1351, dz * sp);
         }
     }
 }

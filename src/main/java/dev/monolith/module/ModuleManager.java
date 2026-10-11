@@ -3,8 +3,8 @@ package dev.monolith.module;
 import dev.monolith.module.impl.*;
 import dev.monolith.hud.*;
 import org.lwjgl.glfw.GLFW;
-import net.minecraft.client.MinecraftClient;
 import java.util.*;
+import net.minecraft.class_310;
 
 public class ModuleManager {
     private final List<Module> modules = new ArrayList<>();
@@ -20,6 +20,11 @@ public class ModuleManager {
         register(new CrosshairModule());
         register(new NoHurtCam());
         register(new HitboxESP());
+        register(new ESPStyle());
+        register(new Tracers());
+        register(new BlockHighlight());
+        register(new ChunkBorders());
+        register(new Breadcrumbs());
         register(new Aimbot());
         register(new BowAimbot());
         register(new AutoTotem());
@@ -27,6 +32,7 @@ public class ModuleManager {
         register(new Speed());
         register(new XRay());
         register(new Freecam());
+        register(new ParticleAura());
         register(new Waypoints());
         register(new ScoreboardTweak());
         register(new ChatTweak());
@@ -42,6 +48,7 @@ public class ModuleManager {
         register(new ActiveModulesHud());
         register(new SessionHud());
         register(new TargetHud());
+        register(new dev.monolith.hud.Radar());
     }
 
     public void register(Module m) { modules.add(m); }
@@ -51,22 +58,22 @@ public class ModuleManager {
         for (Module m : modules) if (c.isInstance(m)) return (T) m; return null; }
 
     public void preTick() {
-        if (MinecraftClient.getInstance().player == null) return;
+        if (class_310.method_1551().field_1724 == null) return;
         for (Module m : modules) if (m.isEnabled()) m.onPreTick();
     }
 
     public void tick() {
-        MinecraftClient mc = MinecraftClient.getInstance();
-        if (mc.getWindow() == null) return;
-        long h = mc.getWindow().getHandle();
+        class_310 mc = class_310.method_1551();
+        if (mc.method_22683() == null) return;
+        long h = mc.method_22683().method_4490();
         for (Module m : modules) {
             int k = m.keybind.get();
-            if (k > 0 && k <= GLFW.GLFW_KEY_LAST && mc.currentScreen == null) {
+            if (k > 0 && k <= GLFW.GLFW_KEY_LAST && mc.field_1755 == null) {
                 boolean down = GLFW.glfwGetKey(h, k) == GLFW.GLFW_PRESS;
                 if (down && !keyState[k]) m.toggle();
                 keyState[k] = down;
             }
-            if (m.isEnabled() && mc.player != null) m.onTick();
+            if (m.isEnabled() && mc.field_1724 != null) m.onTick();
         }
     }
 }

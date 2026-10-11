@@ -4,8 +4,8 @@ import dev.monolith.module.Category;
 import dev.monolith.module.Module;
 import dev.monolith.setting.*;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.RenderTickCounter;
+import net.minecraft.class_332;
+import net.minecraft.class_9779;
 
 /** Scales, moves or hides a vanilla HUD element by wrapping it (no mixins). Subclasses choose the scaling pivot. */
 public abstract class ElementTweak extends Module {
@@ -18,11 +18,11 @@ public abstract class ElementTweak extends Module {
     protected abstract float pivotX(int w, int h);
     protected abstract float pivotY(int w, int h);
 
-    public void apply(DrawContext c, HudElement vanilla, RenderTickCounter tick) {
+    public void apply(class_332 c, HudElement vanilla, class_9779 tick) {
         if (hide.get()) return;
-        int w = c.getScaledWindowWidth(), h = c.getScaledWindowHeight();
+        int w = c.method_51421(), h = c.method_51443();
         float px = pivotX(w, h), py = pivotY(w, h), s = scale.asFloat();
-        var m = c.getMatrices();
+        var m = c.method_51448();
         m.pushMatrix();
         m.translate(offX.asFloat() + px, offY.asFloat() + py);
         m.scale(s, s);

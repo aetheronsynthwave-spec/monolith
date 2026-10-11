@@ -1,10 +1,8 @@
 package dev.monolith.hud;
-import dev.monolith.module.Module;
-
 import dev.monolith.module.*;
 import dev.monolith.render.*;
 import dev.monolith.setting.*;
-import net.minecraft.client.gui.DrawContext;
+import net.minecraft.class_332;
 
 /** A module with a draggable on-screen element. x/y are stored as fractions of the screen so layouts survive resolution changes. */
 public abstract class HudModule extends Module {
@@ -26,11 +24,11 @@ public abstract class HudModule extends Module {
     public int h() { return (int) (contentH * scale.get()); }
 
     /** Draw content at (0,0); set contentW/contentH. */
-    protected abstract void draw(DrawContext ctx);
+    protected abstract void draw(class_332 ctx);
 
-    @Override public void onHud(DrawContext ctx, float delta) {
-        int sw = ctx.getScaledWindowWidth(), sh = ctx.getScaledWindowHeight();
-        var mat = ctx.getMatrices();
+    @Override public void onHud(class_332 ctx, float delta) {
+        int sw = ctx.method_51421(), sh = ctx.method_51443();
+        var mat = ctx.method_51448();
         mat.pushMatrix();
         mat.translate(px(sw), py(sh));
         mat.scale(scale.asFloat(), scale.asFloat());
@@ -38,13 +36,13 @@ public abstract class HudModule extends Module {
         mat.popMatrix();
     }
 
-    protected void panel(DrawContext ctx, int w, int h) {
+    protected void panel(class_332 ctx, int w, int h) {
         contentW = w; contentH = h;
         if (background.get()) Render2D.rounded(ctx, 0, 0, w, h, 3, Theme.HUD_BG);
     }
 
     /** Convenience for single-line elements. */
-    protected void line(DrawContext ctx, String label, String value) {
+    protected void line(class_332 ctx, String label, String value) {
         String s = label + "  " + value;
         int w = Render2D.width(s) + 10;
         panel(ctx, w, 16);

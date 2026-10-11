@@ -7,6 +7,6 @@ import dev.monolith.module.Module;
 public class ToggleSneak extends Module {
     private boolean saved;
     public ToggleSneak() { super("ToggleSneak", "Press sneak once to stay sneaking.", Category.MOVEMENT); }
-    @Override public void onEnable() { var o = mc.options.getSneakToggled(); saved = o.getValue(); o.setValue(true); }
-    @Override public void onDisable() { mc.options.getSneakToggled().setValue(saved); }
+    @Override public void onEnable() { var o = mc.field_1690.method_42449(); saved = o.method_41753(); o.method_41748(true); }
+    @Override public void onDisable() { mc.field_1690.method_42449().method_41748(saved); }
 }

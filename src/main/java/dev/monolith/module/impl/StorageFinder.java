@@ -2,6 +2,14 @@ package dev.monolith.module.impl;
 
 import dev.monolith.setting.*;
 import net.minecraft.block.entity.*;
+import net.minecraft.class_2586;
+import net.minecraft.class_2595;
+import net.minecraft.class_2601;
+import net.minecraft.class_2608;
+import net.minecraft.class_2614;
+import net.minecraft.class_2627;
+import net.minecraft.class_2646;
+import net.minecraft.class_3719;
 
 public class StorageFinder extends ESPModule {
     public final BoolSetting chests = add(new BoolSetting("Chests", true));
@@ -22,20 +30,20 @@ public class StorageFinder extends ESPModule {
 
     public StorageFinder() { super("Storage Finder", "Highlights containers through walls."); }
 
-    @Override protected boolean accepts(BlockEntity be) {
-        return be instanceof ChestBlockEntity || be instanceof BarrelBlockEntity || be instanceof ShulkerBoxBlockEntity
-            || be instanceof DropperBlockEntity || be instanceof DispenserBlockEntity || be instanceof HopperBlockEntity;
+    @Override protected boolean accepts(class_2586 be) {
+        return be instanceof class_2595 || be instanceof class_3719 || be instanceof class_2627
+            || be instanceof class_2608 || be instanceof class_2601 || be instanceof class_2614;
     }
 
-    @Override protected int colorFor(BlockEntity be) {
+    @Override protected int colorFor(class_2586 be) {
         // Order matters: Trapped is a subclass of Chest, Dropper a subclass of Dispenser.
-        if (be instanceof TrappedChestBlockEntity) return trapped.get() ? cTrapped.get() : 0;
-        if (be instanceof ChestBlockEntity) return chests.get() ? cChest.get() : 0;
-        if (be instanceof BarrelBlockEntity) return barrels.get() ? cBarrel.get() : 0;
-        if (be instanceof ShulkerBoxBlockEntity) return shulkers.get() ? cShulker.get() : 0;
-        if (be instanceof DropperBlockEntity) return droppers.get() ? cDropper.get() : 0;
-        if (be instanceof DispenserBlockEntity) return dispensers.get() ? cDispenser.get() : 0;
-        if (be instanceof HopperBlockEntity) return hoppers.get() ? cHopper.get() : 0;
+        if (be instanceof class_2646) return trapped.get() ? cTrapped.get() : 0;
+        if (be instanceof class_2595) return chests.get() ? cChest.get() : 0;
+        if (be instanceof class_3719) return barrels.get() ? cBarrel.get() : 0;
+        if (be instanceof class_2627) return shulkers.get() ? cShulker.get() : 0;
+        if (be instanceof class_2608) return droppers.get() ? cDropper.get() : 0;
+        if (be instanceof class_2601) return dispensers.get() ? cDispenser.get() : 0;
+        if (be instanceof class_2614) return hoppers.get() ? cHopper.get() : 0;
         return 0;
     }
 }

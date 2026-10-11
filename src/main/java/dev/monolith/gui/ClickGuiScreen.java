@@ -5,13 +5,15 @@ import dev.monolith.module.Category;
 import dev.monolith.module.Module;
 import dev.monolith.render.*;
 import dev.monolith.setting.*;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.Click;
+import net.minecraft.class_1109;
+import net.minecraft.class_11905;
+import net.minecraft.class_11908;
+import net.minecraft.class_11909;
+import net.minecraft.class_2561;
+import net.minecraft.class_332;
+import net.minecraft.class_3417;
+import net.minecraft.class_437;
 import net.minecraft.client.input.*;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 import java.util.*;
 
@@ -20,7 +22,7 @@ import java.util.*;
  * Animations: open/close pop, sliding tab indicator, staggered card entrance, hover fades, eased sliders/toggles.
  * Press the GUI key again (Right Shift by default) or Esc to close.
  */
-public class ClickGuiScreen extends Screen {
+public class ClickGuiScreen extends class_437 {
     private static final float S = 0.85f, CARD = 32f, RAIL = 96f;
     private static final String PROFILES = "Profiles", HUDEDIT = "Edit HUD";
     private static final int[] PALETTE = {0xFFFFFFFF, 0xFFBDBDBD, 0xFF757575, 0xFFFF4D4D, 0xFFFF9F43, 0xFFFFD93D, 0xFF5EE08A, 0xFF4FD8FF, 0xFF5C7CFF, 0xFFB06CFF, 0xFFFF6FB5};
@@ -38,16 +40,16 @@ public class ClickGuiScreen extends Screen {
     private float px, py, pw, ph, vw, vh;
 
     public ClickGuiScreen() {
-        super(Text.literal("Monolith"));
+        super(class_2561.method_43470("Monolith"));
         for (Category c : Category.values()) if (!Monolith.modules().byCategory(c).isEmpty()) tabs.add(c.label);
         tabs.add(HUDEDIT); tabs.add(PROFILES);
         tab = tabs.get(0);
     }
 
-    @Override public boolean shouldPause() { return false; }
-    @Override public void renderBackground(DrawContext c, int mx, int my, float d) {}
+    @Override public boolean method_25421() { return false; }
+    @Override public void method_25420(class_332 c, int mx, int my, float d) {}
 
-    private void click() { client.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.6f)); }
+    private void click() { field_22787.method_1483().method_4873(class_1109.method_47978(class_3417.field_15015, 1.6f)); }
     private void requestClose() { if (!closing) { closing = true; searchFocus = profileFocus = false; listening = null; } }
     private float sm(Object key, float target, float speed) {
         float v = Render2D.approach(smooth.getOrDefault(key, target), target, dt, speed);
@@ -55,17 +57,17 @@ public class ClickGuiScreen extends Screen {
     }
     private static float ease(float t) { t = Math.max(0, Math.min(1, t)); return 1 - (float) Math.pow(1 - t, 3); }
 
-    @Override public void tick() {
-        if (closing && openT <= 0.001f) { Monolith.config().save(Monolith.config().active()); client.setScreen(null); }
+    @Override public void method_25393() {
+        if (closing && openT <= 0.001f) { Monolith.config().save(Monolith.config().active()); field_22787.method_1507(null); }
     }
 
     // ===================================================== render
-    @Override public void render(DrawContext c, int mxr, int myr, float partial) {
+    @Override public void method_25394(class_332 c, int mxr, int myr, float partial) {
         long now = System.nanoTime(); dt = Math.min(0.05f, (now - last) / 1e9f); last = now;
         double mx = mxr / S, my = myr / S;
 
         // Close with the GUI key (polled, so it works even while a text box is focused).
-        boolean down = GLFW.glfwGetKey(client.getWindow().getHandle(), Monolith.guiKey) == GLFW.GLFW_PRESS;
+        boolean down = GLFW.glfwGetKey(field_22787.method_22683().method_4490(), Monolith.guiKey) == GLFW.GLFW_PRESS;
         if (down && !guiKeyDown && listening == null) requestClose();
         guiKeyDown = down;
 
@@ -76,11 +78,11 @@ public class ClickGuiScreen extends Screen {
         tabAnim = Render2D.approach(tabAnim, 1, dt, 9);
         tooltip = null;
 
-        Render2D.rect(c, 0, 0, width, height, ((int) (0x99 * e)) << 24);
+        Render2D.rect(c, 0, 0, field_22789, field_22790, ((int) (0x99 * e)) << 24);
 
-        var m = c.getMatrices();
+        var m = c.method_51448();
         m.pushMatrix(); m.scale(S, S);
-        vw = width / S; vh = height / S;
+        vw = field_22789 / S; vh = field_22790 / S;
         pw = Math.min(380, vw - 20); ph = Math.min(250, vh - 20);
         px = (vw - pw) / 2f; py = (vh - ph) / 2f + (1 - e) * 10;
         float ps = 0.94f + 0.06f * e, pcx = px + pw / 2, pcy = py + ph / 2;
@@ -106,7 +108,7 @@ public class ClickGuiScreen extends Screen {
         m.popMatrix(); m.popMatrix();
     }
 
-    private void drawRail(DrawContext c, double mx, double my) {
+    private void drawRail(class_332 c, double mx, double my) {
         Render2D.textShadow(c, "MONOLITH", px + 16, py + 14, Theme.TEXT);
         Render2D.text(c, "client", px + 16, py + 25, Theme.TEXT_DIM);
         float ty0 = py + 46, target = ty0 + tabs.indexOf(tab) * 22;
@@ -142,14 +144,14 @@ public class ClickGuiScreen extends Screen {
         return CARD + 4 + inner * ex;
     }
 
-    private void drawModules(DrawContext c, double mx, double my, float x, float y, float w) {
+    private void drawModules(class_332 c, double mx, double my, float x, float y, float w) {
         float focus = sm("search", searchFocus ? 1 : 0, 14);
         Render2D.roundedBordered(c, x, y, w, 22, 7, Theme.CARD, Render2D.lerpColor(Theme.BORDER, Theme.BORDER_HI, focus));
         String shownText = search.isEmpty() && !searchFocus ? "Search modules..." : search + (searchFocus && (System.currentTimeMillis() / 500 % 2 == 0) ? "_" : "");
         Render2D.text(c, shownText, x + 9, y + 7, search.isEmpty() ? Theme.TEXT_DIM : Theme.TEXT);
 
         float listTop = y + 30, listH = py + ph - listTop - 8;
-        c.enableScissor((int) (x - 2), (int) listTop, (int) (x + w + 2), (int) (listTop + listH));
+        c.method_44379((int) (x - 2), (int) listTop, (int) (x + w + 2), (int) (listTop + listH));
         float cy = listTop - scroll, total = 0; int idx = 0;
         for (Module mo : visibleModules()) {
             float[] a = anim.computeIfAbsent(mo, k -> new float[]{mo.isEnabled() ? 1 : 0, 0, 0});
@@ -172,19 +174,19 @@ public class ClickGuiScreen extends Screen {
             if (hov) tooltip = "Left-click: toggle   Right-click: settings";
 
             if (a[1] > 0.02f) {
-                c.enableScissor((int) x, (int) Math.max(listTop, cyy + CARD), (int) (x + w), (int) Math.min(listTop + listH, cyy + h));
+                c.method_44379((int) x, (int) Math.max(listTop, cyy + CARD), (int) (x + w), (int) Math.min(listTop + listH, cyy + h));
                 float sy = cyy + CARD + 2;
                 for (Setting<?> s : shown(mo)) { drawSetting(c, mx, my, s, x + 10, sy - (1 - a[1]) * 6, w - 20); sy += settingH(s) + 2; }
-                c.disableScissor();
+                c.method_44380();
             }
             cy += h + 5; total += h + 5;
         }
-        c.disableScissor();
+        c.method_44380();
         scrollTarget = Math.max(0, Math.min(scrollTarget, Math.max(0, total - listH)));
         if (total > listH) { float bh = Math.max(14, listH * listH / total), by = listTop + (scroll / total) * listH; Render2D.rounded(c, x + w + 3, by, 2, bh, 1, Theme.BORDER_HI); }
     }
 
-    private void drawSetting(DrawContext c, double mx, double my, Setting<?> s, float x, float y, float w) {
+    private void drawSetting(class_332 c, double mx, double my, Setting<?> s, float x, float y, float w) {
         if (Render2D.hover(mx, my, x, y, w, settingH(s)) && !s.tooltip.isEmpty()) tooltip = s.tooltip;
         Render2D.text(c, s.name, x + 2, y + 6, Theme.TEXT_DIM);
         if (s instanceof BoolSetting b) {
@@ -219,7 +221,7 @@ public class ClickGuiScreen extends Screen {
     }
 
     // ===================================================== profiles
-    private void drawProfiles(DrawContext c, double mx, double my, float x, float y, float w) {
+    private void drawProfiles(class_332 c, double mx, double my, float x, float y, float w) {
         var cfg = Monolith.config();
         Render2D.text(c, "Active: " + cfg.active(), x, y + 2, Theme.TEXT);
         Render2D.text(c, status, x + w - Render2D.width(status), y + 2, Theme.TEXT_DIM);
@@ -238,7 +240,7 @@ public class ClickGuiScreen extends Screen {
         button(c, mx, my, x, py + ph - 32, 112, 20, "Export > clipboard"); button(c, mx, my, x + 118, py + ph - 32, 120, 20, "Import < clipboard");
     }
 
-    private void button(DrawContext c, double mx, double my, float x, float y, float w, float h, String t) {
+    private void button(class_332 c, double mx, double my, float x, float y, float w, float h, String t) {
         float k = sm("b" + x + ":" + y, Render2D.hover(mx, my, x, y, w, h) ? 1 : 0, 16);
         Render2D.roundedBordered(c, x, y, w, h, 6, Render2D.lerpColor(0xFF181818, 0xFF262626, k), Render2D.lerpColor(Theme.BORDER, Theme.BORDER_HI, k));
         Render2D.centered(c, t, x + w / 2f, y + (h - 8) / 2f, Theme.TEXT);
@@ -246,9 +248,9 @@ public class ClickGuiScreen extends Screen {
     private boolean hit(double mx, double my, float x, float y, float w, float h) { return Render2D.hover(mx, my, x, y, w, h); }
 
     // ===================================================== input
-    @Override public boolean mouseClicked(Click ev, boolean dbl) {
+    @Override public boolean method_25402(class_11909 ev, boolean dbl) {
         if (closing) return true;
-        double mx = ev.x() / S, my = ev.y() / S; int btn = ev.button();
+        double mx = ev.comp_4798() / S, my = ev.comp_4799() / S; int btn = ev.method_74245();
         listening = null; searchFocus = false; profileFocus = false;
         float ty0 = py + 46;
         for (int i = 0; i < tabs.size(); i++) {
@@ -259,7 +261,7 @@ public class ClickGuiScreen extends Screen {
             }
         }
         float cx = px + RAIL + 12, cw = pw - RAIL - 24, cy = py + 12;
-        if (tab.equals(HUDEDIT)) { if (hit(mx, my, cx, cy + 20, 100, 20)) { click(); client.setScreen(new HudEditorScreen(this)); } return true; }
+        if (tab.equals(HUDEDIT)) { if (hit(mx, my, cx, cy + 20, 100, 20)) { click(); field_22787.method_1507(new HudEditorScreen(this)); } return true; }
         if (tab.equals(PROFILES)) { profileClick(mx, my, cx, cy, cw); return true; }
         if (hit(mx, my, cx, cy, cw, 22)) { searchFocus = true; return true; }
         float listTop = cy + 30, listH = py + ph - listTop - 8;
@@ -300,9 +302,9 @@ public class ClickGuiScreen extends Screen {
         float f = Math.max(0, Math.min(1, (float) ((mx - dragX) / dragW)));
         dragging.set(dragging.min + (dragging.max - dragging.min) * f);
     }
-    @Override public boolean mouseDragged(Click ev, double dx, double dy) { if (dragging != null) { setFromMouse(ev.x() / S); return true; } return false; }
-    @Override public boolean mouseReleased(Click ev) { dragging = null; return true; }
-    @Override public boolean mouseScrolled(double mx, double my, double h, double v) { scrollTarget -= (float) v * 28; if (scrollTarget < 0) scrollTarget = 0; return true; }
+    @Override public boolean method_25403(class_11909 ev, double dx, double dy) { if (dragging != null) { setFromMouse(ev.comp_4798() / S); return true; } return false; }
+    @Override public boolean method_25406(class_11909 ev) { dragging = null; return true; }
+    @Override public boolean method_25401(double mx, double my, double h, double v) { scrollTarget -= (float) v * 28; if (scrollTarget < 0) scrollTarget = 0; return true; }
 
     private void profileClick(double mx, double my, float x, float y, float w) {
         var cfg = Monolith.config();
@@ -316,12 +318,12 @@ public class ClickGuiScreen extends Screen {
             else if (hit(mx, my, x + w - 40, ry + 2, 36, 20)) { cfg.delete(p); status = "Deleted " + p; click(); }
             ry += 28;
         }
-        if (hit(mx, my, x, py + ph - 32, 112, 20)) { client.keyboard.setClipboard(cfg.export()); status = "Copied to clipboard"; click(); }
-        if (hit(mx, my, x + 118, py + ph - 32, 120, 20)) { status = cfg.importString(client.keyboard.getClipboard(), profileInput.isBlank() ? "imported" : profileInput) ? "Imported" : "Invalid clipboard data"; click(); }
+        if (hit(mx, my, x, py + ph - 32, 112, 20)) { field_22787.field_1774.method_1455(cfg.export()); status = "Copied to clipboard"; click(); }
+        if (hit(mx, my, x + 118, py + ph - 32, 120, 20)) { status = cfg.importString(field_22787.field_1774.method_1460(), profileInput.isBlank() ? "imported" : profileInput) ? "Imported" : "Invalid clipboard data"; click(); }
     }
 
-    @Override public boolean keyPressed(KeyInput in) {
-        int key = in.key();
+    @Override public boolean method_25404(class_11908 in) {
+        int key = in.comp_4795();
         if (listening != null) { listening.set(key == GLFW.GLFW_KEY_ESCAPE || key == GLFW.GLFW_KEY_BACKSPACE ? -1 : key); listening = null; return true; }
         if (key == GLFW.GLFW_KEY_BACKSPACE) {
             if (searchFocus && !search.isEmpty()) search = search.substring(0, search.length() - 1);
@@ -330,10 +332,10 @@ public class ClickGuiScreen extends Screen {
         }
         if (key == GLFW.GLFW_KEY_ESCAPE) { if (searchFocus || profileFocus) { searchFocus = profileFocus = false; } else requestClose(); return true; }
         if (key == Monolith.guiKey) { requestClose(); return true; }
-        return super.keyPressed(in);
+        return super.method_25404(in);
     }
-    @Override public boolean charTyped(CharInput in) {
-        String s = new String(Character.toChars(in.codepoint()));
+    @Override public boolean method_25400(class_11905 in) {
+        String s = new String(Character.toChars(in.comp_4793()));
         if (searchFocus) { search += s; scrollTarget = 0; return true; }
         if (profileFocus && profileInput.length() < 24) { profileInput += s; return true; }
         return false;

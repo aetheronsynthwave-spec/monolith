@@ -4,9 +4,11 @@ import dev.monolith.module.Category;
 import dev.monolith.module.Module;
 import dev.monolith.render.*;
 import dev.monolith.setting.*;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.gui.DrawContext;
+import net.minecraft.class_2246;
+import net.minecraft.class_2248;
+import net.minecraft.class_2338;
+import net.minecraft.class_238;
+import net.minecraft.class_332;
 import net.minecraft.util.math.*;
 import java.util.*;
 
@@ -21,67 +23,67 @@ public class XRay extends Module {
         final String label; final int color;
         Ore(String l, int c) { label = l; color = c; }
     }
-    private record Hit(Box box, Ore ore, double d2, double x, double y, double z) {}
+    private record Hit(class_238 box, Ore ore, double d2, double x, double y, double z) {}
 
-    private final Map<Block, Ore> blocks = new HashMap<>();
+    private final Map<class_2248, Ore> blocks = new HashMap<>();
     private final Map<Ore, BoolSetting> toggles = new EnumMap<>(Ore.class);
     public final NumberSetting range = add(new NumberSetting("Range", 20, 8, 48, 4));
     public final NumberSetting lineWidth = add(new NumberSetting("Line Width", 1, 1, 3, 1));
     public final BoolSetting tracers = add(new BoolSetting("Tracers", false));
     private final Map<Long, Ore> found = new HashMap<>();
     private final List<Hit> hits = new ArrayList<>();
-    private final BlockPos.Mutable cursor = new BlockPos.Mutable();
+    private final class_2338.class_2339 cursor = new class_2338.class_2339();
     private int layer, ticks;
 
     public XRay() {
         super("X-Ray", "Outlines ores through walls.", Category.RENDER);
         for (Ore o : Ore.values()) toggles.put(o, add(new BoolSetting(o.label, true)));
-        put(Ore.COAL, Blocks.COAL_ORE, Blocks.DEEPSLATE_COAL_ORE);
-        put(Ore.IRON, Blocks.IRON_ORE, Blocks.DEEPSLATE_IRON_ORE);
-        put(Ore.COPPER, Blocks.COPPER_ORE, Blocks.DEEPSLATE_COPPER_ORE);
-        put(Ore.GOLD, Blocks.GOLD_ORE, Blocks.DEEPSLATE_GOLD_ORE, Blocks.NETHER_GOLD_ORE);
-        put(Ore.REDSTONE, Blocks.REDSTONE_ORE, Blocks.DEEPSLATE_REDSTONE_ORE);
-        put(Ore.LAPIS, Blocks.LAPIS_ORE, Blocks.DEEPSLATE_LAPIS_ORE);
-        put(Ore.DIAMOND, Blocks.DIAMOND_ORE, Blocks.DEEPSLATE_DIAMOND_ORE);
-        put(Ore.EMERALD, Blocks.EMERALD_ORE, Blocks.DEEPSLATE_EMERALD_ORE);
-        put(Ore.QUARTZ, Blocks.NETHER_QUARTZ_ORE);
-        put(Ore.DEBRIS, Blocks.ANCIENT_DEBRIS);
+        put(Ore.COAL, class_2246.field_10418, class_2246.field_29219);
+        put(Ore.IRON, class_2246.field_10212, class_2246.field_29027);
+        put(Ore.COPPER, class_2246.field_27120, class_2246.field_29221);
+        put(Ore.GOLD, class_2246.field_10571, class_2246.field_29026, class_2246.field_23077);
+        put(Ore.REDSTONE, class_2246.field_10080, class_2246.field_29030);
+        put(Ore.LAPIS, class_2246.field_10090, class_2246.field_29028);
+        put(Ore.DIAMOND, class_2246.field_10442, class_2246.field_29029);
+        put(Ore.EMERALD, class_2246.field_10013, class_2246.field_29220);
+        put(Ore.QUARTZ, class_2246.field_10213);
+        put(Ore.DEBRIS, class_2246.field_22109);
         range.tooltip = "Scan radius in blocks. Bigger = slower to refresh.";
     }
-    private void put(Ore o, Block... bs) { for (Block b : bs) blocks.put(b, o); }
+    private void put(Ore o, class_2248... bs) { for (class_2248 b : bs) blocks.put(b, o); }
 
     @Override public void onDisable() { found.clear(); hits.clear(); }
     @Override public void onDisconnect() { found.clear(); hits.clear(); }
 
     /** Scans ONE horizontal layer per tick (about 1,700 blocks) so there is no lag spike. */
     @Override public void onTick() {
-        if (mc.world == null) return;
+        if (mc.field_1687 == null) return;
         int r = range.asInt(), span = 2 * r + 1;
-        BlockPos c = mc.player.getBlockPos();
-        int y = c.getY() - r + (layer++ % span);
-        found.entrySet().removeIf(en -> BlockPos.unpackLongY(en.getKey()) == y);
-        for (int x = c.getX() - r; x <= c.getX() + r; x++)
-            for (int z = c.getZ() - r; z <= c.getZ() + r; z++) {
-                Ore o = blocks.get(mc.world.getBlockState(cursor.set(x, y, z)).getBlock());
-                if (o != null) found.put(cursor.asLong(), o);
+        class_2338 c = mc.field_1724.method_24515();
+        int y = c.method_10264() - r + (layer++ % span);
+        found.entrySet().removeIf(en -> class_2338.method_10071(en.getKey()) == y);
+        for (int x = c.method_10263() - r; x <= c.method_10263() + r; x++)
+            for (int z = c.method_10260() - r; z <= c.method_10260() + r; z++) {
+                Ore o = blocks.get(mc.field_1687.method_8320(cursor.method_10103(x, y, z)).method_26204());
+                if (o != null) found.put(cursor.method_10063(), o);
             }
         if (ticks++ % 10 == 0) rebuild(c, r);
     }
 
-    private void rebuild(BlockPos c, int r) {
+    private void rebuild(class_2338 c, int r) {
         hits.clear();
         double max = (r + 6.0) * (r + 6.0);
         var it = found.entrySet().iterator();
         while (it.hasNext()) {
-            var en = it.next(); BlockPos p = BlockPos.fromLong(en.getKey());
-            double dx = p.getX() + 0.5 - c.getX(), dy = p.getY() + 0.5 - c.getY(), dz = p.getZ() + 0.5 - c.getZ(), d2 = dx * dx + dy * dy + dz * dz;
+            var en = it.next(); class_2338 p = class_2338.method_10092(en.getKey());
+            double dx = p.method_10263() + 0.5 - c.method_10263(), dy = p.method_10264() + 0.5 - c.method_10264(), dz = p.method_10260() + 0.5 - c.method_10260(), d2 = dx * dx + dy * dy + dz * dz;
             if (d2 > max) { it.remove(); continue; }                       // drop stale far-away entries
-            hits.add(new Hit(new Box(p), en.getValue(), d2, p.getX() + 0.5, p.getY() + 0.5, p.getZ() + 0.5));
+            hits.add(new Hit(new class_238(p), en.getValue(), d2, p.method_10263() + 0.5, p.method_10264() + 0.5, p.method_10260() + 0.5));
         }
         hits.sort(Comparator.comparingDouble(Hit::d2));
     }
 
-    @Override public void onHud(DrawContext c, float delta) {
+    @Override public void onHud(class_332 c, float delta) {
         if (!Projector.valid) return;
         double r2 = range.get() * range.get(); int drawn = 0, th = lineWidth.asInt();
         for (Hit h : hits) {
