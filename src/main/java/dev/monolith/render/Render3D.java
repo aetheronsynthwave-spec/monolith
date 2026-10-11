@@ -49,6 +49,9 @@ public final class Render3D {
     private static final class_1921 FILL_WALLS = layer("monolith_esp_fill", FILL_WALLS_P, false);
     private static final class_1921 FILL_DEPTH = layer("monolith_esp_fill_depth", FILL_DEPTH_P, false);
 
+    /** Kept for binary compatibility with 1.0.2 (the through-walls line layer). */
+    public static final class_1921 LINES = LINE_WALLS;
+
     // One Immediate per layer: switching layers inside a single Immediate would flush it every time.
     private static final class_4597.class_4598 IMM_LINE_WALLS = class_4597.method_22991(new class_9799(0x10000));
     private static final class_4597.class_4598 IMM_LINE_DEPTH = class_4597.method_22991(new class_9799(0x10000));

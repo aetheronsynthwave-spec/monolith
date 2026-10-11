@@ -1,12 +1,24 @@
 {
   "schemaVersion": 1,
   "id": "monolith",
-  "version": "${version}",
+  "version": "1.0.3",
   "name": "Monolith Client",
   "description": "Premium monochrome client.",
   "environment": "client",
-  "entrypoints": { "client": ["dev.monolith.Monolith"] },
-  "mixins": ["monolith.mixins.json"],
+  "entrypoints": {
+    "client": [
+      "dev.monolith.Monolith",
+      "dev.monolith.ExtraModules"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  },
   "accessWidener": "monolith.accesswidener",
-  "depends": { "fabricloader": ">=0.16.0", "minecraft": "~1.21.11", "java": ">=21", "fabric-api": "*" }
+  "mixins": [
+    "monolith.mixins.json"
+  ]
 }

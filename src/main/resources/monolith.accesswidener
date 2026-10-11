@@ -1,2 +1,7 @@
-accessWidener v2 named
-accessible field net/minecraft/client/option/SimpleOption value Ljava/lang/Object;
+accessWidener	v2	intermediary
+accessible	method	net/minecraft/class_1921	method_75940	(Ljava/lang/String;Lnet/minecraft/class_12247;)Lnet/minecraft/class_1921;
+accessible	field	net/minecraft/class_10799	field_56859	Lcom/mojang/blaze3d/pipeline/RenderPipeline$Snippet;
+accessible	method	net/minecraft/class_757	method_3196	(Lnet/minecraft/class_4184;FZ)F
+accessible	field	net/minecraft/class_304	field_1661	I
+accessible	field	net/minecraft/class_310	field_1771	I
+accessible	field	net/minecraft/class_7172	field_37868	Ljava/lang/Object;

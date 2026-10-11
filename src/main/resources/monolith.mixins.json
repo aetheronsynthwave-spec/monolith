@@ -3,6 +3,14 @@
   "minVersion": "0.8",
   "package": "dev.monolith.mixin",
   "compatibilityLevel": "JAVA_21",
-  "client": ["EntityLookMixin"],
-  "injectors": { "defaultRequire": 1 }
+  "client": [
+    "ClientPlayerEntityMixin",
+    "HeldItemRendererMixin",
+    "LivingEntityMixin",
+    "GameRendererMixin",
+    "EntityLookMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
 }
